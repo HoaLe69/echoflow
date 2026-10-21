@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en" style="">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="web_standard" name="shell-type">
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet">
+  <style>
+    @layer base {
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        overscroll-behavior: none;
+      }
+
+      main>:first-child {
+        margin-top: 0 !important;
+      }
+
+      main>:last-child {
+        margin-bottom: 0 !important;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script
+    id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"secondary": "#78583e", "inverse-surface": "#2e312e", "on-error-container": "#93000a", "on-tertiary-fixed": "#3b0616", "on-secondary-fixed": "#2c1603", "outline-variant": "#c2c8bd", "on-surface": "#191c1a", "tertiary-fixed": "#ffd9de", "outline": "#73796f", "tertiary": "#783645", "surface-container-highest": "#e1e3de", "surface-container-high": "#e7e9e4", "on-tertiary-fixed-variant": "#733140", "on-tertiary-container": "#ffd6db", "primary-fixed": "#c7edbf", "on-secondary-container": "#78583f", "surface-container-lowest": "#ffffff", "on-primary": "#ffffff", "surface": "#f8faf5", "inverse-on-surface": "#eff1ec", "primary-container": "#4a6b47", "on-primary-fixed": "#022106", "surface-container": "#ecefea", "inverse-primary": "#abd0a5", "secondary-container": "#fdd2b1", "surface-bright": "#f8faf5", "surface-variant": "#e1e3de", "primary": "#335331", "error-container": "#ffdad6", "surface-dim": "#d8dbd6", "on-secondary-fixed-variant": "#5d4128", "secondary-fixed-dim": "#e8be9f", "secondary-fixed": "#ffdcc2", "surface-container-low": "#f2f4ef", "on-background": "#191c1a", "on-primary-fixed-variant": "#2e4e2d", "tertiary-container": "#954d5c", "primary-fixed-dim": "#abd0a5", "on-primary-container": "#c4eabd", "on-secondary": "#ffffff", "background": "#f8faf5", "on-error": "#ffffff", "on-tertiary": "#ffffff", "on-surface-variant": "#424840", "error": "#ba1a1a", "surface-tint": "#466643", "tertiary-fixed-dim": "#ffb2bf", "matcha-forest": "#1f2e1e", "matcha-sage": "#566854", "matcha-foam": "#e8f0e3", "matcha-cream": "#f4f7f1", "mochi-pink": "#e68e9d", "mochi-pink-light": "#fcebec", "hojicha": "#7d624a"}, borderRadius: {"DEFAULT": "0.25rem", "lg": "0.75rem", "xl": "1rem", "2xl": "1.25rem", "3xl": "1.75rem", "full": "9999px"}, fontFamily: {"body": ["Plus Jakarta Sans", "sans-serif"]}}}};</script>
+</head>
+
+<body
+  class="bg-surface font-body text-matcha-forest antialiased min-h-screen flex flex-col justify-between selection:bg-primary-fixed selection:text-matcha-forest">
+  <header
+    class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-md border-b border-primary/10 shadow-[0_2px_12px_rgba(51,83,49,0.04)]">
+    <div class="max-w-7xl mx-auto h-16 px-4 sm:px-6 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-6"><a class="flex items-center gap-2 group" data-path="conversations"
+          href="#"><span
+            class="w-9 h-9 rounded-2xl bg-primary-fixed flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">🍵</span><span
+            class="text-xl font-extrabold text-primary tracking-tight">EchoFlow</span></a></div>
+    </div>
+  </header>
+  <main class="w-full pt-16 flex-grow bg-surface">
+    <div class="flex flex-col w-full pb-16">
+      <!-- Top Gentle Matcha Aura Hero Area -->
+      <section class="relative w-full overflow-hidden px-4 sm:px-6 pt-8 pb-6">
+        <div class="absolute -top-24 right-1/4 w-80 h-80 rounded-full bg-primary-fixed/30 blur-3xl pointer-events-none">
+        </div>
+        <div
+          class="absolute top-1/3 left-10 w-64 h-64 rounded-full bg-mochi-pink-light/60 blur-3xl pointer-events-none">
+        </div>
+        <div class="relative max-w-7xl mx-auto flex flex-col gap-6">
+          <!-- Banner & Cute Reflex Goal Card -->
+
+          <!-- Action Bar: Add Scenario & Filter Tabs -->
+          <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pt-1">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1">
+              <button
+                class="flex items-center justify-center gap-2 bg-primary hover:bg-primary-container text-on-primary px-5 py-2.5 rounded-full text-sm font-bold shadow-sm hover:shadow transition-all active:scale-[0.98]"
+                id="open-custom-modal-btn" type="button">
+                <span class="material-symbols-outlined text-lg">add_circle</span>
+                <span class="">Prepare Custom Loop</span>
+              </button>
+              <div class="relative flex-1">
+                <span
+                  class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-matcha-sage text-lg">search</span>
+                <input
+                  class="w-full bg-surface-container-lowest text-matcha-forest placeholder:text-matcha-sage/70 pl-10 pr-4 py-2.5 rounded-full text-sm border border-primary/10 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                  id="search-input" placeholder="Search coffee, airport, standup, small talk..." type="text">
+              </div>
+            </div>
+            <!-- Matcha Level Tabs -->
+            <div
+              class="flex items-center gap-1 overflow-x-auto p-1 bg-surface-container-low/90 border border-primary/10 rounded-full">
+              <button
+                class="level-tab-btn px-4 py-1.5 rounded-full text-xs font-bold bg-surface-container-lowest text-primary shadow-sm transition-all"
+                data-level="all" type="button">
+                All Levels
+              </button>
+              <button
+                class="level-tab-btn px-3.5 py-1.5 rounded-full text-xs font-semibold text-matcha-sage hover:text-matcha-forest hover:bg-surface-container-lowest/70 transition-all whitespace-nowrap"
+                data-level="a1-a2" type="button">
+                🌱 A1-A2 Beginner
+              </button>
+              <button
+                class="level-tab-btn px-3.5 py-1.5 rounded-full text-xs font-semibold text-matcha-sage hover:text-matcha-forest hover:bg-surface-container-lowest/70 transition-all whitespace-nowrap"
+                data-level="b1" type="button">
+                🍵 B1 Everyday Fluency
+              </button>
+              <button
+                class="level-tab-btn px-3.5 py-1.5 rounded-full text-xs font-semibold text-matcha-sage hover:text-matcha-forest hover:bg-surface-container-lowest/70 transition-all whitespace-nowrap"
+                data-level="b2" type="button">
+                💼 B2 Pro
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Main Section: Conversation Cards Grid -->
+      <section class="w-full px-4 sm:px-6 mt-2">
+        <div class="max-w-7xl mx-auto flex flex-col gap-5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold text-matcha-forest">Calibrated Practice Loops</h2>
+              <span
+                class="bg-matcha-foam border border-primary/10 text-primary px-2.5 py-0.5 rounded-full text-xs font-bold"
+                id="active-card-count">6 scenarios</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs font-semibold text-matcha-sage">
+              <span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+              <span class="">Audio sync ready</span>
+            </div>
+          </div>
+          <!-- Bento-style Grid of 6 High-Fidelity Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="cards-container">
+            <!-- CARD 1: Ordering Coffee -->
+            <article
+              class="group flex flex-col bg-surface-container-lowest rounded-3xl p-5 border border-primary/10 shadow-[0_4px_20px_rgba(51,83,49,0.03)] hover:shadow-[0_12px_28px_rgba(51,83,49,0.08)] hover:-translate-y-0.5 transition-all duration-200"
+              data-keywords="coffee cafe drink order a2 beginner customer barista" data-level="a1-a2">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="bg-matcha-foam text-primary text-xs font-bold px-2.5 py-0.5 rounded-full">🌱 A2
+                    Beginner</span>
+                  <span class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">6
+                    Turns</span>
+                  <span
+                    class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">Cafe
+                    &amp; Daily</span>
+                </div>
+                <button aria-label="Favorite this scenario"
+                  class="favorite-toggle text-outline/50 hover:text-tertiary transition-colors p-1" type="button">
+                  <span class="material-symbols-outlined text-lg text-tertiary"
+                    style="font-variation-settings: 'FILL' 1;">favorite</span>
+                </button>
+              </div>
+              <h3 class="text-lg font-bold text-matcha-forest group-hover:text-primary transition-colors">
+                Ordering Coffee &amp; Customizing Drink
+              </h3>
+              <p class="text-xs text-hojicha font-semibold mt-1">
+                🎯 Goal: Zero hesitation ordering under 15s
+              </p>
+              <div class="flex items-center gap-2 text-xs text-matcha-sage mt-2">
+                <span class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-semibold">You:
+                  Customer</span>
+                <span class="text-outline-variant">⇄</span>
+                <span
+                  class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-medium">Barista</span>
+              </div>
+              <div
+                class="relative mt-3 p-3.5 bg-surface-container-low/70 border border-primary/5 rounded-2xl flex flex-col gap-1">
+                <div class="flex items-center justify-between text-matcha-sage">
+                  <span class="text-xs font-bold text-primary">Turn 1 / 6</span>
+                  <span class="material-symbols-outlined text-sm">volume_up</span>
+                </div>
+                <p class="text-sm text-matcha-forest font-medium italic">
+                  "Hi there! Could I get an iced oat latte with half sugar, please?"
+                </p>
+                <p class="text-xs text-matcha-sage/80 font-mono">
+                  /haɪ ðer kʊd aɪ ɡɛt ən aɪst oʊt ˈlɑteɪ.../
+                </p>
+              </div>
+              <div class="mt-4 pt-1 flex flex-col gap-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-matcha-sage font-medium">Fluency Score</span>
+                  <span class="font-extrabold text-primary">84%</span>
+                </div>
+                <div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+                  <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: 84%"></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-matcha-sage mt-0.5">
+                  <span class="">8 reps completed</span>
+                  <span class="text-primary font-bold flex items-center gap-0.5">
+                    <span class="material-symbols-outlined text-sm">verified</span> Blind Mode Unlocked
+                  </span>
+                </div>
+              </div>
+              <div class="mt-auto pt-4 flex items-center gap-2">
+                <button
+                  class="start-practice-btn flex-1 bg-primary hover:bg-primary-container text-on-primary py-2 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                  type="button">
+                  <span class="">Start Loop</span>
+                  <span class="material-symbols-outlined text-base">arrow_forward</span>
+                </button>
+                <button
+                  class="preview-script-btn bg-surface-container-low hover:bg-surface-container-high text-matcha-forest px-3.5 py-2 rounded-full text-xs font-semibold transition-colors"
+                  type="button">
+                  Script
+                </button>
+              </div>
+            </article>
+            <!-- CARD 2: Airport Hotel -->
+            <article
+              class="group flex flex-col bg-surface-container-lowest rounded-3xl p-5 border border-primary/10 shadow-[0_4px_20px_rgba(51,83,49,0.03)] hover:shadow-[0_12px_28px_rgba(51,83,49,0.08)] hover:-translate-y-0.5 transition-all duration-200"
+              data-keywords="hotel airport checkin b1 intermediate guest flight delayed" data-level="b1">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="bg-primary-fixed/80 text-primary text-xs font-bold px-2.5 py-0.5 rounded-full">🍵 B1
+                    Everyday</span>
+                  <span class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">8
+                    Turns</span>
+                  <span
+                    class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">Travel</span>
+                </div>
+                <button aria-label="Favorite this scenario"
+                  class="favorite-toggle text-outline/50 hover:text-tertiary transition-colors p-1" type="button">
+                  <span class="material-symbols-outlined text-lg">favorite</span>
+                </button>
+              </div>
+              <h3 class="text-lg font-bold text-matcha-forest group-hover:text-primary transition-colors">
+                Checking In at Airport Hotel Late Night
+              </h3>
+              <p class="text-xs text-matcha-sage font-medium mt-1">
+                Reflex Goal: Explaining booking change smoothly
+              </p>
+              <div class="flex items-center gap-2 text-xs text-matcha-sage mt-2">
+                <span class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-semibold">You:
+                  Guest</span>
+                <span class="text-outline-variant">⇄</span>
+                <span class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-medium">Front
+                  Desk</span>
+              </div>
+              <div
+                class="relative mt-3 p-3.5 bg-surface-container-low/70 border border-primary/5 rounded-2xl flex flex-col gap-1">
+                <div class="flex items-center justify-between text-matcha-sage">
+                  <span class="text-xs font-bold text-primary">Turn 1 / 8</span>
+                  <span class="material-symbols-outlined text-sm">volume_up</span>
+                </div>
+                <p class="text-sm text-matcha-forest font-medium italic">
+                  "Good evening. I have a reservation under Lin, but my flight got delayed."
+                </p>
+                <p class="text-xs text-matcha-sage/80 font-mono">
+                  /ɡʊd ˈivnɪŋ aɪ hæv ə ˌrɛzərˈveɪʃən.../
+                </p>
+              </div>
+              <div class="mt-4 pt-1 flex flex-col gap-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-matcha-sage font-medium">Fluency Score</span>
+                  <span class="font-extrabold text-primary">68%</span>
+                </div>
+                <div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+                  <div class="h-full bg-primary/80 rounded-full" style="width: 68%"></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-matcha-sage mt-0.5">
+                  <span class="">3 reps completed</span>
+                  <span class="text-hojicha font-semibold">Next: Practice Speaker B</span>
+                </div>
+              </div>
+              <div class="mt-auto pt-4 flex items-center gap-2">
+                <button
+                  class="start-practice-btn flex-1 bg-primary hover:bg-primary-container text-on-primary py-2 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                  type="button">
+                  <span class="">Start Loop</span>
+                  <span class="material-symbols-outlined text-base">arrow_forward</span>
+                </button>
+                <button
+                  class="preview-script-btn bg-surface-container-low hover:bg-surface-container-high text-matcha-forest px-3.5 py-2 rounded-full text-xs font-semibold transition-colors"
+                  type="button">
+                  Script
+                </button>
+              </div>
+            </article>
+            <!-- CARD 3: Remote Team Standup -->
+            <article
+              class="group flex flex-col bg-surface-container-lowest rounded-3xl p-5 border border-primary/10 shadow-[0_4px_20px_rgba(51,83,49,0.03)] hover:shadow-[0_12px_28px_rgba(51,83,49,0.08)] hover:-translate-y-0.5 transition-all duration-200"
+              data-keywords="remote standup team engineer tech work b1 intermediate" data-level="b1">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="bg-primary-fixed/80 text-primary text-xs font-bold px-2.5 py-0.5 rounded-full">🍵 B1
+                    Everyday</span>
+                  <span class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">6
+                    Turns</span>
+                  <span
+                    class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">Tech
+                    &amp; Work</span>
+                </div>
+                <button aria-label="Favorite this scenario"
+                  class="favorite-toggle text-outline/50 hover:text-tertiary transition-colors p-1" type="button">
+                  <span class="material-symbols-outlined text-lg text-tertiary"
+                    style="font-variation-settings: 'FILL' 1;">favorite</span>
+                </button>
+              </div>
+              <h3 class="text-lg font-bold text-matcha-forest group-hover:text-primary transition-colors">
+                Introducing Yourself in a Team Standup
+              </h3>
+              <p class="text-xs text-primary font-bold mt-1">
+                ⚡️ Muscle Memory: Speaking Naturally
+              </p>
+              <div class="flex items-center gap-2 text-xs text-matcha-sage mt-2">
+                <span class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-semibold">You:
+                  New Dev</span>
+                <span class="text-outline-variant">⇄</span>
+                <span
+                  class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-medium">Lead</span>
+              </div>
+              <div
+                class="relative mt-3 p-3.5 bg-surface-container-low/70 border border-primary/5 rounded-2xl flex flex-col gap-1">
+                <div class="flex items-center justify-between text-matcha-sage">
+                  <span class="text-xs font-bold text-primary">Turn 1 / 6</span>
+                  <span class="material-symbols-outlined text-sm">volume_up</span>
+                </div>
+                <p class="text-sm text-matcha-forest font-medium italic">
+                  "Hey everyone, excited to be here! Yesterday I spent time setting up the local repo..."
+                </p>
+                <p class="text-xs text-matcha-sage/80 font-mono">
+                  /heɪ ˈɛvriˌwʌn ɪkˈsaɪtɪd tu bi hɪr.../
+                </p>
+              </div>
+              <div class="mt-4 pt-1 flex flex-col gap-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-matcha-sage font-medium">Fluency Score</span>
+                  <span class="font-extrabold text-primary">92%</span>
+                </div>
+                <div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+                  <div class="h-full bg-primary rounded-full" style="width: 92%"></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-matcha-sage mt-0.5">
+                  <span class="">14 reps completed</span>
+                  <span class="text-primary font-bold">Ready for Live Call ✨</span>
+                </div>
+              </div>
+              <div class="mt-auto pt-4 flex items-center gap-2">
+                <button
+                  class="start-practice-btn flex-1 bg-primary hover:bg-primary-container text-on-primary py-2 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                  type="button">
+                  <span class="">Start Loop</span>
+                  <span class="material-symbols-outlined text-base">arrow_forward</span>
+                </button>
+                <button
+                  class="preview-script-btn bg-surface-container-low hover:bg-surface-container-high text-matcha-forest px-3.5 py-2 rounded-full text-xs font-semibold transition-colors"
+                  type="button">
+                  Script
+                </button>
+              </div>
+            </article>
+            <!-- CARD 4: Handling Food Delivery -->
+            <article
+              class="group flex flex-col bg-surface-container-lowest rounded-3xl p-5 border border-primary/10 shadow-[0_4px_20px_rgba(51,83,49,0.03)] hover:shadow-[0_12px_28px_rgba(51,83,49,0.08)] hover:-translate-y-0.5 transition-all duration-200"
+              data-keywords="food delivery order complaint support customer a2 beginner problem solving"
+              data-level="a1-a2">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="bg-matcha-foam text-primary text-xs font-bold px-2.5 py-0.5 rounded-full">🌱 A2
+                    Beginner</span>
+                  <span class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">5
+                    Turns</span>
+                  <span
+                    class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">Problem
+                    Solving</span>
+                </div>
+                <button aria-label="Favorite this scenario"
+                  class="favorite-toggle text-outline/50 hover:text-tertiary transition-colors p-1" type="button">
+                  <span class="material-symbols-outlined text-lg">favorite</span>
+                </button>
+              </div>
+              <h3 class="text-lg font-bold text-matcha-forest group-hover:text-primary transition-colors">
+                Handling an Incorrect Food Delivery
+              </h3>
+              <p class="text-xs text-matcha-sage font-medium mt-1">
+                Goal: Calm assertiveness without awkward filler pauses
+              </p>
+              <div class="flex items-center gap-2 text-xs text-matcha-sage mt-2">
+                <span class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-semibold">You:
+                  Customer</span>
+                <span class="text-outline-variant">⇄</span>
+                <span
+                  class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-medium">Support</span>
+              </div>
+              <div
+                class="relative mt-3 p-3.5 bg-surface-container-low/70 border border-primary/5 rounded-2xl flex flex-col gap-1">
+                <div class="flex items-center justify-between text-matcha-sage">
+                  <span class="text-xs font-bold text-primary">Turn 1 / 5</span>
+                  <span class="material-symbols-outlined text-sm">volume_up</span>
+                </div>
+                <p class="text-sm text-matcha-forest font-medium italic">
+                  "Hi, I just opened order #402, and the avocado roll was missing."
+                </p>
+                <p class="text-xs text-matcha-sage/80 font-mono">
+                  /haɪ aɪ dʒʌst ˈoʊpənd ˈɔrdər.../
+                </p>
+              </div>
+              <div class="mt-4 pt-1 flex flex-col gap-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-matcha-sage font-medium">Status</span>
+                  <span class="font-bold text-hojicha">Fresh Scenario 🍵</span>
+                </div>
+                <div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+                  <div class="h-full bg-outline-variant/60 rounded-full" style="width: 15%"></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-matcha-sage mt-0.5">
+                  <span class="">0 loops completed</span>
+                  <span class="">Est. 4 mins</span>
+                </div>
+              </div>
+              <div class="mt-auto pt-4 flex items-center gap-2">
+                <button
+                  class="start-practice-btn flex-1 bg-hojicha hover:bg-hojicha/90 text-on-secondary py-2 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                  type="button">
+                  <span class="">Start First Loop</span>
+                  <span class="material-symbols-outlined text-base">play_arrow</span>
+                </button>
+                <button
+                  class="preview-script-btn bg-surface-container-low hover:bg-surface-container-high text-matcha-forest px-3.5 py-2 rounded-full text-xs font-semibold transition-colors"
+                  type="button">
+                  Script
+                </button>
+              </div>
+            </article>
+            <!-- CARD 5: Explaining Why Late -->
+            <article
+              class="group flex flex-col bg-surface-container-lowest rounded-3xl p-5 border border-primary/10 shadow-[0_4px_20px_rgba(51,83,49,0.03)] hover:shadow-[0_12px_28px_rgba(51,83,49,0.08)] hover:-translate-y-0.5 transition-all duration-200"
+              data-keywords="late subway etiquette apology friend social a2 beginner" data-level="a1-a2">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="bg-matcha-foam text-primary text-xs font-bold px-2.5 py-0.5 rounded-full">🌱 A2+
+                    Easy</span>
+                  <span class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">4
+                    Turns</span>
+                  <span
+                    class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">Social
+                    Manners</span>
+                </div>
+                <button aria-label="Favorite this scenario"
+                  class="favorite-toggle text-outline/50 hover:text-tertiary transition-colors p-1" type="button">
+                  <span class="material-symbols-outlined text-lg">favorite</span>
+                </button>
+              </div>
+              <h3 class="text-lg font-bold text-matcha-forest group-hover:text-primary transition-colors">
+                Explaining Why You're Late with Natural Politeness
+              </h3>
+              <p class="text-xs text-matcha-sage font-medium mt-1">
+                Goal: Smooth apology rhythm without stammering
+              </p>
+              <div class="flex items-center gap-2 text-xs text-matcha-sage mt-2">
+                <span class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-semibold">You:
+                  Colleague</span>
+                <span class="text-outline-variant">⇄</span>
+                <span
+                  class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-medium">Host</span>
+              </div>
+              <div
+                class="relative mt-3 p-3.5 bg-surface-container-low/70 border border-primary/5 rounded-2xl flex flex-col gap-1">
+                <div class="flex items-center justify-between text-matcha-sage">
+                  <span class="text-xs font-bold text-primary">Turn 1 / 4</span>
+                  <span class="material-symbols-outlined text-sm">volume_up</span>
+                </div>
+                <p class="text-sm text-matcha-forest font-medium italic">
+                  "I'm so sorry to keep you waiting! The subway had an unexpected signal delay."
+                </p>
+                <p class="text-xs text-matcha-sage/80 font-mono">
+                  /aɪm soʊ ˈsɑri tu kip ju ˈweɪtɪŋ.../
+                </p>
+              </div>
+              <div class="mt-4 pt-1 flex flex-col gap-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-matcha-sage font-medium">Hesitation Rate</span>
+                  <span class="font-extrabold text-primary">-30% dropped</span>
+                </div>
+                <div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+                  <div class="h-full bg-primary rounded-full" style="width: 70%"></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-matcha-sage mt-0.5">
+                  <span class="">5 loops done</span>
+                  <span class="text-matcha-forest font-medium">Cadence flowing</span>
+                </div>
+              </div>
+              <div class="mt-auto pt-4 flex items-center gap-2">
+                <button
+                  class="start-practice-btn flex-1 bg-primary hover:bg-primary-container text-on-primary py-2 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                  type="button">
+                  <span class="">Start Loop</span>
+                  <span class="material-symbols-outlined text-base">arrow_forward</span>
+                </button>
+                <button
+                  class="preview-script-btn bg-surface-container-low hover:bg-surface-container-high text-matcha-forest px-3.5 py-2 rounded-full text-xs font-semibold transition-colors"
+                  type="button">
+                  Script
+                </button>
+              </div>
+            </article>
+            <!-- CARD 6: Weekend Small Talk -->
+            <article
+              class="group flex flex-col bg-surface-container-lowest rounded-3xl p-5 border border-primary/10 shadow-[0_4px_20px_rgba(51,83,49,0.03)] hover:shadow-[0_12px_28px_rgba(51,83,49,0.08)] hover:-translate-y-0.5 transition-all duration-200"
+              data-keywords="neighbor small talk weather weekend casual b1 intermediate" data-level="b1">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="bg-primary-fixed/80 text-primary text-xs font-bold px-2.5 py-0.5 rounded-full">🍵 B1
+                    Everyday</span>
+                  <span class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">7
+                    Turns</span>
+                  <span
+                    class="bg-surface-container-low text-matcha-sage text-xs font-medium px-2 py-0.5 rounded-full">Casual
+                    Talk</span>
+                </div>
+                <button aria-label="Favorite this scenario"
+                  class="favorite-toggle text-outline/50 hover:text-tertiary transition-colors p-1" type="button">
+                  <span class="material-symbols-outlined text-lg">favorite</span>
+                </button>
+              </div>
+              <h3 class="text-lg font-bold text-matcha-forest group-hover:text-primary transition-colors">
+                Casual Weekend Small Talk with a Neighbor
+              </h3>
+              <p class="text-xs text-matcha-sage font-medium mt-1">
+                Goal: Natural breezy transitions &amp; friendly tone
+              </p>
+              <div class="flex items-center gap-2 text-xs text-matcha-sage mt-2">
+                <span class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-semibold">You:
+                  Resident</span>
+                <span class="text-outline-variant">⇄</span>
+                <span
+                  class="bg-surface-container-low px-2 py-0.5 rounded-full text-matcha-forest font-medium">Neighbor</span>
+              </div>
+              <div
+                class="relative mt-3 p-3.5 bg-surface-container-low/70 border border-primary/5 rounded-2xl flex flex-col gap-1">
+                <div class="flex items-center justify-between text-matcha-sage">
+                  <span class="text-xs font-bold text-primary">Turn 1 / 7</span>
+                  <span class="material-symbols-outlined text-sm">volume_up</span>
+                </div>
+                <p class="text-sm text-matcha-forest font-medium italic">
+                  "Great weather we're having today, isn't it? Are you heading out to the park?"
+                </p>
+                <p class="text-xs text-matcha-sage/80 font-mono">
+                  /ɡreɪt ˈwɛðər wir ˈhævɪŋ təˈdeɪ.../
+                </p>
+              </div>
+              <div class="mt-4 pt-1 flex flex-col gap-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-matcha-sage font-medium">Fluency Score</span>
+                  <span class="font-extrabold text-primary">78%</span>
+                </div>
+                <div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+                  <div class="h-full bg-primary/80 rounded-full" style="width: 78%"></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-matcha-sage mt-0.5">
+                  <span class="">6 loops done</span>
+                  <span class="text-matcha-forest font-medium">Rhythm steady</span>
+                </div>
+              </div>
+              <div class="mt-auto pt-4 flex items-center gap-2">
+                <button
+                  class="start-practice-btn flex-1 bg-primary hover:bg-primary-container text-on-primary py-2 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                  type="button">
+                  <span class="">Start Loop</span>
+                  <span class="material-symbols-outlined text-base">arrow_forward</span>
+                </button>
+                <button
+                  class="preview-script-btn bg-surface-container-low hover:bg-surface-container-high text-matcha-forest px-3.5 py-2 rounded-full text-xs font-semibold transition-colors"
+                  type="button">
+                  Script
+                </button>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+      <!-- Bottom Feature Highlight Bar: Why Repetition Works -->
+      <section class="w-full px-4 sm:px-6 mt-12">
+
+      </section>
+      <!-- MODAL: Prepare Custom Conversation -->
+      <div
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-matcha-forest/30 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200"
+        id="custom-modal">
+        <div
+          class="bg-surface-container-lowest rounded-3xl max-w-lg w-full p-6 sm:p-7 border border-primary/15 shadow-2xl flex flex-col gap-4 transform scale-95 transition-transform duration-200"
+          id="custom-modal-panel">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-2xl bg-matcha-foam text-primary flex items-center justify-center text-lg">
+                ✍️
+              </div>
+              <h3 class="text-lg font-bold text-matcha-forest">Prepare Custom Dialogue</h3>
+            </div>
+            <button
+              class="text-matcha-sage hover:text-matcha-forest p-1 rounded-full hover:bg-surface-container-low transition-colors"
+              id="close-custom-modal-btn" type="button">
+              <span class="material-symbols-outlined text-xl">close</span>
+            </button>
+          </div>
+          <p class="text-xs sm:text-sm text-matcha-sage leading-relaxed">
+            Got a meeting, interview, or specific chat coming up? Drop the scenario here to create your personal
+            repetition loop!
+          </p>
+          <form class="flex flex-col gap-3" id="custom-form" onsubmit="event.preventDefault();">
+            <label class="flex flex-col gap-1">
+              <span class="text-xs font-bold text-matcha-forest">Scenario Title</span>
+              <input
+                class="bg-surface-container-low text-matcha-forest px-3.5 py-2 rounded-xl text-xs sm:text-sm border border-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                placeholder="e.g. Asking for matcha latte recommendation" type="text">
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="flex flex-col gap-1">
+                <span class="text-xs font-bold text-matcha-forest">Level</span>
+                <select
+                  class="bg-surface-container-low text-matcha-forest px-3 py-2 rounded-xl text-xs sm:text-sm border border-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/40">
+                  <option>A2 (Simple &amp; Slow)</option>
+                  <option selected="">B1 (Everyday Fluency)</option>
+                  <option>B2 (Work Professional)</option>
+                </select>
+              </label>
+              <label class="flex flex-col gap-1">
+                <span class="text-xs font-bold text-matcha-forest">Your Role</span>
+                <select
+                  class="bg-surface-container-low text-matcha-forest px-3 py-2 rounded-xl text-xs sm:text-sm border border-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/40">
+                  <option>Speaker A (Initiator)</option>
+                  <option>Speaker B (Responder)</option>
+                </select>
+              </label>
+            </div>
+            <label class="flex flex-col gap-1">
+              <span class="text-xs font-bold text-matcha-forest">Script Dialogue</span>
+              <textarea
+                class="bg-surface-container-low text-matcha-forest p-3 rounded-xl text-xs sm:text-sm border border-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
+                placeholder="Speaker A: What would you recommend for iced drinks?
+Speaker B: The ceremonial grade matcha latte with oat milk is wonderful!" rows="3"></textarea>
+            </label>
+            <div class="flex items-center justify-end gap-2.5 mt-2">
+              <button
+                class="px-4 py-2 rounded-full text-xs font-semibold text-matcha-sage hover:text-matcha-forest hover:bg-surface-container-low transition-colors"
+                id="cancel-custom-modal-btn" type="button">
+                Cancel
+              </button>
+              <button
+                class="bg-primary hover:bg-primary-container text-on-primary px-5 py-2 rounded-full text-xs font-bold shadow-sm transition-all"
+                id="save-custom-modal-btn" type="button">
+                Create Practice Loop 🍵
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <script>
+        (function () {
+          const filterBtns = document.querySelectorAll('.level-tab-btn');
+          const searchInput = document.getElementById('search-input');
+          const cards = document.querySelectorAll('#cards-container article');
+          const countDisplay = document.getElementById('active-card-count');
+
+          let currentLevel = 'all';
+          let currentQuery = '';
+
+          function applyFilters() {
+            let visibleCount = 0;
+            cards.forEach(card => {
+              const cardLevel = card.getAttribute('data-level');
+              const keywords = card.getAttribute('data-keywords').toLowerCase();
+
+              const matchesLevel = (currentLevel === 'all') || (cardLevel === currentLevel);
+              const matchesQuery = !currentQuery || keywords.includes(currentQuery);
+
+              if (matchesLevel && matchesQuery) {
+                card.style.display = 'flex';
+                visibleCount++;
+              } else {
+                card.style.display = 'none';
+              }
+            });
+
+            if (countDisplay) {
+              countDisplay.textContent = visibleCount + ' scenarios';
+            }
+          }
+
+          filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+              filterBtns.forEach(b => {
+                b.classList.remove('bg-surface-container-lowest', 'text-primary', 'font-bold', 'shadow-sm');
+                b.classList.add('text-matcha-sage', 'font-semibold');
+              });
+              btn.classList.add('bg-surface-container-lowest', 'text-primary', 'font-bold', 'shadow-sm');
+              btn.classList.remove('text-matcha-sage', 'font-semibold');
+
+              currentLevel = btn.getAttribute('data-level');
+              applyFilters();
+            });
+          });
+
+          if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+              currentQuery = e.target.value.trim().toLowerCase();
+              applyFilters();
+            });
+          }
+
+          const favBtns = document.querySelectorAll('.favorite-toggle');
+          favBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const icon = btn.querySelector('.material-symbols-outlined');
+              if (icon) {
+                const isFilled = icon.style.fontVariationSettings?.includes("'FILL' 1");
+                if (isFilled) {
+                  icon.style.fontVariationSettings = "'FILL' 0";
+                  icon.classList.remove('text-tertiary');
+                  icon.classList.add('text-outline');
+                } else {
+                  icon.style.fontVariationSettings = "'FILL' 1";
+                  icon.classList.add('text-tertiary');
+                  icon.classList.remove('text-outline');
+                }
+              }
+            });
+          });
+
+          const modal = document.getElementById('custom-modal');
+          const modalPanel = document.getElementById('custom-modal-panel');
+          const openBtn = document.getElementById('open-custom-modal-btn');
+          const closeBtn = document.getElementById('close-custom-modal-btn');
+          const cancelBtn = document.getElementById('cancel-custom-modal-btn');
+          const saveBtn = document.getElementById('save-custom-modal-btn');
+
+          function showModal() {
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+              modal.classList.remove('opacity-0');
+              modalPanel.classList.remove('scale-95');
+              modalPanel.classList.add('scale-100');
+            }, 10);
+          }
+
+          function hideModal() {
+            if (!modal) return;
+            modal.classList.add('opacity-0');
+            modalPanel.classList.remove('scale-100');
+            modalPanel.classList.add('scale-95');
+            setTimeout(() => {
+              modal.classList.add('hidden');
+            }, 200);
+          }
+
+          if (openBtn) openBtn.addEventListener('click', showModal);
+          if (closeBtn) closeBtn.addEventListener('click', hideModal);
+          if (cancelBtn) cancelBtn.addEventListener('click', hideModal);
+          if (saveBtn) {
+            saveBtn.addEventListener('click', () => {
+              hideModal();
+            });
+          }
+
+          if (modal) {
+            modal.addEventListener('click', (e) => {
+              if (e.target === modal) hideModal();
+            });
+          }
+
+          const practiceBtns = document.querySelectorAll('.start-practice-btn');
+          practiceBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+              const originalText = this.innerHTML;
+              this.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">refresh</span><span>Brewing Loop...</span>';
+              setTimeout(() => {
+                this.innerHTML = '<span class="material-symbols-outlined text-base">mic</span><span>Listening 🍵</span>';
+                setTimeout(() => {
+                  this.innerHTML = originalText;
+                }, 1500);
+              }, 600);
+            });
+          });
+        })();
+      </script>
+    </div>
+  </main>
+  <footer class="w-full bg-surface-container-low border-t border-primary/10 py-5 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center justify-center gap-2"><span
+          class="text-xs font-bold text-matcha-sage">Shortcuts:</span>
+        <div class="flex items-center gap-1.5"><kbd
+            class="bg-surface-container-lowest text-matcha-forest text-xs font-bold px-2 py-0.5 rounded-md border border-primary/10 shadow-sm">Space</kbd><span
+            class="text-xs text-matcha-sage">to speak</span></div><span class="text-outline-variant">·</span>
+        <div class="flex items-center gap-1.5"><kbd
+            class="bg-surface-container-lowest text-matcha-forest text-xs font-bold px-2 py-0.5 rounded-md border border-primary/10 shadow-sm">H</kbd><span
+            class="text-xs text-matcha-sage">hide script</span></div><span class="text-outline-variant">·</span>
+        <div class="flex items-center gap-1.5"><kbd
+            class="bg-surface-container-lowest text-matcha-forest text-xs font-bold px-2 py-0.5 rounded-md border border-primary/10 shadow-sm">R</kbd><span
+            class="text-xs text-matcha-sage">replay</span></div>
+      </div>
+      <div class="flex items-center gap-4 text-xs text-matcha-sage"><span
+          class="italic text-matcha-sage/80 hidden sm:inline">🍵 Speak without mental translation</span>
+        <div class="flex items-center gap-3"><a class="hover:text-matcha-forest transition-colors font-medium"
+            data-path="sound-check" href="#">Sound Check</a><a
+            class="hover:text-matcha-forest transition-colors font-medium" data-path="help-support" href="#">Help &amp;
+            Support</a></div>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body>
+
+</html>

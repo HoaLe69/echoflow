@@ -1,0 +1,318 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta content="web_standard" name="shell-type">
+<title>EchoFlow - Conversation Practice</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary": "#78583e",
+            "inverse-surface": "#2e312e",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#3b0616",
+            "on-secondary-fixed": "#2c1603",
+            "outline-variant": "#c2c8bd",
+            "on-surface": "#191c1a",
+            "tertiary-fixed": "#ffd9de",
+            "outline": "#73796f",
+            "tertiary": "#783645",
+            "surface-container-highest": "#e1e3de",
+            "surface-container-high": "#e7e9e4",
+            "on-tertiary-fixed-variant": "#733140",
+            "on-tertiary-container": "#ffd6db",
+            "primary-fixed": "#c7edbf",
+            "on-secondary-container": "#78583f",
+            "surface-container-lowest": "#ffffff",
+            "on-primary": "#ffffff",
+            "surface": "#f8faf5",
+            "inverse-on-surface": "#eff1ec",
+            "primary-container": "#4a6b47",
+            "on-primary-fixed": "#022106",
+            "surface-container": "#ecefea",
+            "inverse-primary": "#abd0a5",
+            "secondary-container": "#fdd2b1",
+            "surface-bright": "#f8faf5",
+            "surface-variant": "#e1e3de",
+            "primary": "#335331",
+            "error-container": "#ffdad6",
+            "surface-dim": "#d8dbd6",
+            "on-secondary-fixed-variant": "#5d4128",
+            "secondary-fixed-dim": "#e8be9f",
+            "secondary-fixed": "#ffdcc2",
+            "surface-container-low": "#f2f4ef",
+            "on-background": "#191c1a",
+            "on-primary-fixed-variant": "#2e4e2d",
+            "tertiary-container": "#954d5c",
+            "primary-fixed-dim": "#abd0a5",
+            "on-primary-container": "#c4eabd",
+            "on-secondary": "#ffffff",
+            "background": "#f8faf5",
+            "on-error": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "on-surface-variant": "#424840",
+            "error": "#ba1a1a",
+            "surface-tint": "#466643",
+            "tertiary-fixed-dim": "#ffb2bf",
+            // Custom Matcha Mochi accents
+            "matcha-soft": "#e8f0e3",
+            "matcha-accent": "#436540",
+            "matcha-deep": "#1f2e1e",
+            "mochi-pink": "#fcebec",
+            "mochi-rose": "#e68e9d",
+            "hojicha-warm": "#a3704c"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1.25rem",
+            "3xl": "1.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            "body": ["Plus Jakarta Sans", "sans-serif"],
+            "headline": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased min-h-screen flex flex-col justify-between selection:bg-primary-fixed selection:text-matcha-deep">
+<!-- Top Zen Matcha Navigation Header -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-md border-b border-surface-container-highest/60">
+<div class="h-16 w-full px-4 md:px-8 max-w-7xl mx-auto flex items-center justify-between gap-4">
+<div class="flex items-center gap-6">
+<a class="flex items-center gap-2 group" data-path="conversations" href="#">
+<div class="w-9 h-9 rounded-2xl bg-matcha-soft text-primary flex items-center justify-center font-bold text-lg shadow-sm group-hover:rotate-6 transition-transform">
+            🍵
+          </div>
+<div class="flex flex-col">
+<span class="font-headline font-bold text-primary tracking-tight text-lg leading-none">EchoFlow</span>
+<span class="text-[10px] text-outline font-semibold tracking-wide uppercase">Matcha practice</span>
+</div>
+</a>
+
+</div>
+
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="w-full pt-16 flex-grow bg-surface">
+<div class="flex flex-col w-full">
+<!-- Scenario Command Bar: Soft Matcha Pill Ribbon -->
+<section class="w-full px-4 md:px-8 py-3 bg-surface-container-low/80 backdrop-blur-md sticky top-16 z-30 border-b border-surface-container-high/60">
+<div class="max-w-3xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><a class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-primary hover:bg-matcha-soft transition-colors flex-shrink-0" href="#" title="Back to Library"><span class="material-symbols-outlined text-base">arrow_back</span></a><div class="min-w-0"><div class="flex items-center gap-2"><span class="text-xs font-bold text-primary bg-primary-fixed/60 px-2.5 py-0.5 rounded-full">A2-B1 Everyday Fluency</span><span class="text-outline-variant">•</span><span class="text-xs text-on-surface-variant font-medium flex items-center gap-1"><span class="material-symbols-outlined text-xs text-secondary">local_cafe</span> Coffee Shop Drill</span></div><h1 class="font-headline font-bold text-base md:text-lg text-primary tracking-tight truncate mt-0.5">Ordering Coffee &amp; Customizing Drink</h1></div></div><div class="flex flex-wrap items-center gap-2"><div class="flex items-center bg-surface-container p-1 rounded-full shadow-sm text-xs font-semibold"><button class="px-3 py-1 rounded-full bg-surface-container-lowest text-primary font-bold shadow-sm flex items-center gap-1 transition-all" id="roleCustomerBtn" type="button"><span class="material-symbols-outlined text-xs">person</span><span class="">You: Customer</span></button><button class="px-3 py-1 rounded-full text-on-surface-variant hover:text-primary flex items-center gap-1 transition-all" id="roleBaristaBtn" type="button"><span class="material-symbols-outlined text-xs">coffee_maker</span><span class="">You: Barista</span></button><button class="px-2 py-1 rounded-full text-outline hover:text-primary transition-all" id="roleSwapBtn" title="Auto-swap roles per round" type="button"><span class="material-symbols-outlined text-sm">sync_alt</span></button></div><div class="flex items-center bg-surface-container p-1 rounded-full shadow-sm text-xs font-semibold"><button class="px-3 py-1 rounded-full bg-surface-container-lowest text-primary font-bold shadow-sm transition-all" id="modeFullBtn" title="Full Transcript" type="button">Full</button><button class="px-3 py-1 rounded-full text-on-surface-variant hover:text-primary transition-all" id="modeKeywordsBtn" title="Keywords Only" type="button">Blur Prompt</button><button class="px-3 py-1 rounded-full text-on-surface-variant hover:text-primary transition-all" id="modeHiddenBtn" title="Blind Automaticity Mode" type="button">Blind Reflex</button></div><div class="hidden sm:flex items-center bg-surface-container p-1 rounded-full shadow-sm text-xs font-semibold"><span class="text-outline px-1.5 flex items-center"><span class="material-symbols-outlined text-xs">speed</span></span><button class="px-2 py-0.5 rounded-full text-on-surface-variant hover:text-primary transition-colors" id="speedSlowBtn" type="button">0.8x</button><button class="px-2 py-0.5 rounded-full bg-surface-container-lowest text-primary font-bold shadow-sm" id="speedNormalBtn" type="button">1.0x</button><button class="px-2 py-0.5 rounded-full text-on-surface-variant hover:text-primary transition-colors" id="speedFastBtn" type="button">1.2x</button></div></div></div>
+</section>
+<!-- Main Body: Zen Tea Session Layout (8 cols dialogue + 4 cols companion) -->
+<div class="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5 mb-32"><main class="w-full flex flex-col gap-5 min-w-0"><div class="bg-matcha-soft/70 border border-primary-fixed/50 rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3 shadow-sm"><div class="flex items-center gap-2 text-on-surface-variant text-xs md:text-sm"><span class="text-base">🍵</span><span class=""><strong class="text-primary font-bold">Subconscious Loop:</strong> Round <span class="text-primary font-extrabold bg-primary-fixed/80 px-2 py-0.5 rounded-full">4 of 5</span> — getting smooth like silk!</span></div><div class="flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-full bg-primary" title="Round 1 Complete"></span><span class="inline-block w-2.5 h-2.5 rounded-full bg-primary" title="Round 2 Complete"></span><span class="inline-block w-2.5 h-2.5 rounded-full bg-primary" title="Round 3 Complete"></span><span class="inline-block w-2.5 h-2.5 rounded-full bg-primary ring-2 ring-primary-fixed animate-pulse" title="Current Round 4"></span><span class="inline-block w-2.5 h-2.5 rounded-full bg-surface-container-highest" title="Round 5 Pending"></span></div></div><div class="flex flex-col gap-5" id="dialogueContainer"><article class="flex flex-col gap-2 w-full"><div class="flex items-center gap-2"><img alt="Sam the Barista" class="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-high shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyxfmq-zbcb7X8v7GPwajF7HU88OLBTGKWGsULxAXtg5WldHZBQ2mbQwSj7pHMwvwC4EfAvzWk88nU0wy-FAxvCczc6wyIVZr7aJd5pNp8Uazdom5nfLrUxKP0ai8QZJyER-a0f8shpeI8oiPLOeJnmiqWq0yZCxfuYQA2Zg1QujIlPz_XHULLo3Xa0NOmnKDfyMEwxY-ssUnXqmh3ZUc_QiGNl2OVQU__V-Sx-VV5cOqGb2oICSGT"><span class="text-xs font-bold text-matcha-deep">Sam (Friendly Barista)</span><span class="bg-surface-container-high/80 text-outline px-2 py-0.5 rounded-full text-[11px] font-semibold">Native Audio</span><span class="text-outline text-xs ml-auto">0:04</span></div><div class="bg-surface-container-lowest p-5 sm:p-6 rounded-3xl rounded-tl-sm shadow-[0_2px_12px_rgba(51,83,49,0.04)] border border-surface-container"><p class="font-headline text-base sm:text-lg text-matcha-deep font-medium leading-relaxed">"Good morning! Welcome to Roasters. What can I get started for you today?"</p><div class="mt-3 pt-2 border-t border-surface-container flex flex-wrap items-center justify-between gap-2"><button class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-matcha-soft hover:bg-primary-fixed/80 text-primary font-bold text-xs transition-colors shadow-sm" type="button"><span class="material-symbols-outlined text-sm text-primary">volume_up</span><span class="">Listen Native (1.0x)</span></button><div class="flex items-center gap-1 text-xs text-on-surface-variant font-medium"><span class="material-symbols-outlined text-sm text-primary">check_circle</span><span class="">Played • Your cue next</span></div></div></div></article><article class="flex flex-col gap-2 w-full relative"><div class="absolute -inset-1 rounded-3xl bg-primary-fixed/30 blur-lg pointer-events-none"></div><div class="relative z-10 flex items-center justify-between px-2"><span class="text-xs font-medium text-outline">Step 2 of 4</span><div class="flex items-center gap-2"><span class="text-xs font-bold text-primary bg-primary-fixed px-3 py-0.5 rounded-full flex items-center gap-1 shadow-sm"><span class="material-symbols-outlined text-xs">record_voice_over</span><span class="">YOUR TURN TO SPEAK</span></span><span class="text-xs font-bold text-matcha-deep">You (Customer)</span></div></div><div class="relative z-10 bg-surface-container-lowest p-5 sm:p-6 rounded-3xl rounded-tr-sm shadow-[0_8px_24px_rgba(51,83,49,0.08)] border-2 border-primary-fixed-dim/60"><div class="flex items-center justify-between gap-2 mb-4 pb-2 border-b border-surface-container"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span><span class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1"><span class="">Ready to Speak</span><span class="text-outline font-normal lowercase">(no overthinking!)</span></span></div><button class="inline-flex items-center gap-1 text-xs font-semibold text-tertiary bg-mochi-pink hover:bg-tertiary-fixed px-2.5 py-1 rounded-full transition-colors" id="toggleMeaningHintBtn" type="button"><span class="material-symbols-outlined text-xs">lightbulb</span><span class="" id="hintBtnLabel">Show Pattern Clue</span></button></div><div class="min-h-[4.5rem] py-1" id="targetSentenceBox"><div class="block" id="viewFullText"><p class="font-headline text-lg sm:text-2xl text-matcha-deep font-bold leading-relaxed tracking-normal"><span class="hover:bg-primary-fixed/40 rounded-xl px-1.5 py-0.5 cursor-pointer transition-colors" title="Tap to hear snippet">"Hi there!</span> <span class="hover:bg-primary-fixed/40 rounded-xl px-1.5 py-0.5 cursor-pointer transition-colors">Could I get</span> <span class="hover:bg-primary-fixed/40 rounded-xl px-1.5 py-0.5 cursor-pointer transition-colors">an iced</span> <span class="hover:bg-primary-fixed/40 rounded-xl px-1.5 py-0.5 cursor-pointer transition-colors text-primary underline decoration-primary/40 underline-offset-4 font-extrabold">oat latte</span> <span class="hover:bg-primary-fixed/40 rounded-xl px-1.5 py-0.5 cursor-pointer transition-colors">with half sugar,</span> <span class="hover:bg-primary-fixed/40 rounded-xl px-1.5 py-0.5 cursor-pointer transition-colors">please?"</span></p><div class="mt-3 flex items-center gap-1.5 flex-wrap text-xs font-mono text-outline"><span class="bg-surface-container px-2.5 py-0.5 rounded-full text-matcha-deep">/haɪ ðɛər/</span><span class="bg-surface-container px-2.5 py-0.5 rounded-full text-matcha-deep">/kʊd aɪ ɡɛt/</span><span class="bg-primary-fixed/70 px-2.5 py-0.5 rounded-full text-matcha-deep font-bold">/aɪst oʊt ˈlɑːteɪ/</span><span class="bg-surface-container px-2.5 py-0.5 rounded-full text-matcha-deep">/wɪð hæf ˈʃʊɡər pliːz/</span></div></div><div class="hidden" id="viewBlurText"><p class="font-headline text-lg sm:text-2xl text-matcha-deep font-bold leading-relaxed tracking-normal">"Hi <span class="bg-surface-container-high text-transparent select-none rounded px-2 filter blur-sm">there</span>! Could I <span class="bg-surface-container-high text-transparent select-none rounded px-2 filter blur-sm">get</span> an <strong class="text-primary underline decoration-2 decoration-primary-fixed-dim">iced oat latte</strong> with <strong class="text-primary underline decoration-2 decoration-primary-fixed-dim">half sugar</strong>, <span class="bg-surface-container-high text-transparent select-none rounded px-2 filter blur-sm">please</span>?"</p><p class="text-xs text-on-surface-variant mt-2 italic flex items-center gap-1"><span class="">💡</span> Fill in the blurred blanks from auditory reflex memory.</p></div><div class="hidden" id="viewBlindText"><div class="p-4 bg-matcha-soft/60 rounded-2xl text-center flex flex-col items-center justify-center border border-primary-fixed/60"><span class="text-2xl mb-1">🍵✨</span><h4 class="font-headline font-bold text-matcha-deep text-base">Pure Automaticity Reflex Mode</h4><p class="text-xs text-on-surface-variant max-w-sm mt-1">Text is tucked away. Breathe, visualize the cold iced glass, and say your order naturally!</p></div></div></div><div class="hidden mt-3 p-3 rounded-2xl bg-mochi-pink/60 border border-mochi-rose/30 text-matcha-deep transition-all" id="meaningHintCard"><div class="flex items-start gap-2"><span class="material-symbols-outlined text-tertiary text-base mt-0.5">help</span><div class="text-xs"><div class="font-bold text-tertiary">Natural Cafe Frame:</div><div class="text-on-surface-variant mt-0.5 leading-snug"><strong>"Could I get [drink] with [request], please?"</strong> — Soft, polite, and native-sounding without blunt "I want" commands.</div></div></div></div><div class="mt-4 bg-matcha-soft/50 border border-primary-fixed/40 rounded-2xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div class="flex items-center gap-3"><div class="relative w-11 h-11 flex-shrink-0"><svg class="w-full h-full -rotate-90" viewBox="0 0 36 36"><circle class="text-surface-container-highest stroke-current" cx="18" cy="18" fill="none" r="15.915" stroke-width="3"></circle><circle class="text-primary stroke-current" cx="18" cy="18" fill="none" r="15.915" stroke-dasharray="94, 100" stroke-linecap="round" stroke-width="3"></circle></svg><div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-primary">94%</div></div><div class="min-w-0"><div class="flex items-center gap-1.5 text-xs font-bold text-primary"><span class="">Pronunciation Match: Velvety smooth!</span><span class="material-symbols-outlined text-primary text-xs">verified</span></div><p class="text-xs text-on-surface-variant truncate">Spot-on cadence on <span class="text-primary font-bold">/ˈlɑːteɪ/</span></p></div></div><div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest text-primary font-semibold text-xs border border-primary-fixed flex-shrink-0 self-start sm:self-auto shadow-sm"><span class="">✨</span><span class="">Zero 'umms' detected! Flowing like fresh whisked matcha 🍵</span></div></div><div class="mt-3 flex flex-wrap items-center justify-between gap-2 pt-2 text-xs"><div class="flex items-center gap-2"><button class="inline-flex items-center gap-1 font-semibold text-primary hover:text-matcha-deep transition-colors px-2.5 py-1 rounded-full bg-surface-container" id="hearModelBtn" type="button"><span class="material-symbols-outlined text-sm">headset</span><span class="">Listen Reference</span></button><button class="inline-flex items-center gap-1 font-medium text-outline hover:text-primary transition-colors px-2.5 py-1 rounded-full" id="slowModelBtn" type="button"><span class="material-symbols-outlined text-sm">slow_motion_video</span><span class="">0.8x Breakdown</span></button></div><div class="text-xs text-outline flex items-center gap-1"><kbd class="bg-surface-container-high px-1.5 py-0.5 rounded text-[10px] font-mono">Space</kbd><span class="">to record voice</span></div></div></div></article><article class="flex flex-col gap-2 w-full opacity-70 hover:opacity-100 transition-opacity"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-bold text-xs">S</div><span class="text-xs font-semibold text-on-surface-variant">Sam (Barista)</span><span class="text-xs text-outline ml-auto">Upcoming Turn 3</span></div><div class="bg-surface-container-low p-4 sm:p-5 rounded-3xl rounded-tl-sm border border-surface-container"><p class="font-headline text-sm sm:text-base text-on-surface-variant leading-relaxed">"Sure thing! What size would you like: 12, 16, or 20 ounce? And do you want any extra ice?"</p></div></article><article class="flex flex-col gap-2 w-full opacity-50 hover:opacity-80 transition-opacity"><div class="flex items-center justify-end gap-2"><span class="text-xs text-outline">Upcoming Turn 4</span><span class="text-xs font-semibold text-on-surface-variant">You (Customer)</span></div><div class="bg-surface-container-low p-4 sm:p-5 rounded-3xl rounded-tr-sm border border-surface-container"><p class="font-headline text-sm sm:text-base text-on-surface-variant leading-relaxed">"A 16-ounce medium would be great. And could you go light on the ice, please?"</p></div></article></div></main></div>
+<!-- PERSISTENT MATCHALICIOUS FLOATING ACTION DOCK -->
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest/95 backdrop-blur-xl border-t border-surface-container-high/80 py-3 px-4 md:px-8 shadow-[0_-8px_24px_rgba(51,83,49,0.06)]">
+<div class="max-w-3xl mx-auto flex items-center justify-between gap-4"><div class="hidden sm:flex items-center gap-2 flex-1"><button class="px-3.5 py-2 rounded-full bg-matcha-soft hover:bg-primary-fixed/80 text-primary font-bold text-xs flex items-center gap-1.5 transition-colors shadow-sm" id="dockListenAgainBtn" type="button"><span class="material-symbols-outlined text-base">replay</span><span class="hidden md:inline">Listen Again</span></button><button class="px-3.5 py-2 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-medium text-xs flex items-center gap-1.5 transition-colors" id="dockPracticeLoopBtn" type="button"><span class="material-symbols-outlined text-base">restart_alt</span><span class="hidden md:inline">Reset Repetition</span></button></div><div class="flex flex-col items-center justify-center relative flex-shrink-0"><div class="flex items-center justify-center gap-1 h-5 mb-1 opacity-0 transition-opacity duration-300" id="micWaveform"><span class="w-1 bg-primary rounded-full h-2 animate-bounce"></span><span class="w-1 bg-primary rounded-full h-4 animate-bounce [animation-delay:0.1s]"></span><span class="w-1 bg-primary rounded-full h-2.5 animate-bounce [animation-delay:0.2s]"></span><span class="w-1 bg-primary rounded-full h-5 animate-bounce [animation-delay:0.15s]"></span><span class="w-1 bg-primary rounded-full h-3 animate-bounce [animation-delay:0.25s]"></span></div><div class="relative flex items-center justify-center"><div class="hidden absolute -inset-2.5 rounded-full bg-primary-fixed animate-ping" id="micPulseRing"></div><button aria-label="Tap to Speak" class="relative z-10 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_8px_20px_rgba(51,83,49,0.28)] hover:bg-primary-container hover:scale-105 active:scale-95 transition-all" id="mainMicBtn" type="button"><span class="material-symbols-outlined text-2xl sm:text-3xl" id="micIcon">mic</span></button></div><div class="mt-1 text-center"><span class="text-xs font-bold text-matcha-deep" id="micStatusLabel">Tap or Press [Space] to Speak</span><span class="block text-[11px] text-outline leading-tight" id="micSubtext">Whisk your thoughts straight into sound!</span></div></div><div class="flex items-center justify-end gap-2 flex-1"><button class="px-5 py-2.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-bold text-xs shadow-md flex items-center gap-1.5 transition-all hover:translate-x-0.5" id="dockNextPhraseBtn" type="button"><span class="">Next Turn</span><span class="material-symbols-outlined text-base">arrow_forward</span></button></div></div>
+</div>
+</div>
+</main>
+<!-- Zen Footer -->
+<footer class="w-full bg-surface-container-low border-t border-surface-container py-3 mt-auto">
+<div class="w-full max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-2 text-xs">
+<div class="flex flex-wrap items-center justify-center gap-2">
+<span class="text-outline font-semibold">Shortcuts:</span>
+<div class="flex items-center gap-1">
+<kbd class="bg-surface-container-lowest text-matcha-deep font-mono text-[11px] px-2 py-0.5 rounded shadow-sm border border-surface-container">Space</kbd>
+<span class="text-on-surface-variant">to speak</span>
+</div>
+<span class="text-outline-variant">•</span>
+<div class="flex items-center gap-1">
+<kbd class="bg-surface-container-lowest text-matcha-deep font-mono text-[11px] px-2 py-0.5 rounded shadow-sm border border-surface-container">H</kbd>
+<span class="text-on-surface-variant">hide transcript</span>
+</div>
+<span class="text-outline-variant">•</span>
+<div class="flex items-center gap-1">
+<kbd class="bg-surface-container-lowest text-matcha-deep font-mono text-[11px] px-2 py-0.5 rounded shadow-sm border border-surface-container">R</kbd>
+<span class="text-on-surface-variant">replay audio</span>
+</div>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<span class="italic text-outline">🍵 Practice until you speak without mental translation</span>
+<div class="flex items-center gap-3 pl-2">
+<a class="hover:text-primary transition-colors" data-path="sound-check" href="#">Sound Check</a>
+<a class="hover:text-primary transition-colors" data-path="help-support" href="#">Help &amp; Support</a>
+</div>
+</div>
+</div>
+</footer>
+<!-- Interactive Client-side Script -->
+<script>
+    (function initEchoFlowPractice() {
+      // Transcript Mode Toggles
+      const modeFullBtn = document.getElementById('modeFullBtn');
+      const modeKeywordsBtn = document.getElementById('modeKeywordsBtn');
+      const modeHiddenBtn = document.getElementById('modeHiddenBtn');
+
+      const viewFull = document.getElementById('viewFullText');
+      const viewBlur = document.getElementById('viewBlurText');
+      const viewBlind = document.getElementById('viewBlindText');
+
+      function setTranscriptMode(mode) {
+        [modeFullBtn, modeKeywordsBtn, modeHiddenBtn].forEach(btn => {
+          btn.classList.remove('bg-surface-container-lowest', 'text-primary', 'font-bold', 'shadow-sm');
+          btn.classList.add('text-on-surface-variant');
+        });
+
+        viewFull.classList.add('hidden');
+        viewBlur.classList.add('hidden');
+        viewBlind.classList.add('hidden');
+
+        if (mode === 'full') {
+          modeFullBtn.classList.add('bg-surface-container-lowest', 'text-primary', 'font-bold', 'shadow-sm');
+          modeFullBtn.classList.remove('text-on-surface-variant');
+          viewFull.classList.remove('hidden');
+        } else if (mode === 'keywords') {
+          modeKeywordsBtn.classList.add('bg-surface-container-lowest', 'text-primary', 'font-bold', 'shadow-sm');
+          modeKeywordsBtn.classList.remove('text-on-surface-variant');
+          viewBlur.classList.remove('hidden');
+        } else if (mode === 'blind') {
+          modeHiddenBtn.classList.add('bg-surface-container-lowest', 'text-primary', 'font-bold', 'shadow-sm');
+          modeHiddenBtn.classList.remove('text-on-surface-variant');
+          viewBlind.classList.remove('hidden');
+        }
+      }
+
+      modeFullBtn.addEventListener('click', () => setTranscriptMode('full'));
+      modeKeywordsBtn.addEventListener('click', () => setTranscriptMode('keywords'));
+      modeHiddenBtn.addEventListener('click', () => setTranscriptMode('blind'));
+
+      // Meaning / Pattern Hint Toggle
+      const toggleMeaningBtn = document.getElementById('toggleMeaningHintBtn');
+      const meaningCard = document.getElementById('meaningHintCard');
+      const hintBtnLabel = document.getElementById('hintBtnLabel');
+
+      toggleMeaningBtn.addEventListener('click', () => {
+        const isHidden = meaningCard.classList.contains('hidden');
+        if (isHidden) {
+          meaningCard.classList.remove('hidden');
+          hintBtnLabel.textContent = 'Hide Pattern';
+        } else {
+          meaningCard.classList.add('hidden');
+          hintBtnLabel.textContent = 'Show Pattern Clue';
+        }
+      });
+
+      // Role Selection Buttons Toggle
+      const roleCustomerBtn = document.getElementById('roleCustomerBtn');
+      const roleBaristaBtn = document.getElementById('roleBaristaBtn');
+
+      roleCustomerBtn.addEventListener('click', () => {
+        roleCustomerBtn.className = "px-3 py-1 rounded-full bg-surface-container-lowest text-primary font-bold shadow-sm flex items-center gap-1 transition-all";
+        roleBaristaBtn.className = "px-3 py-1 rounded-full text-on-surface-variant hover:text-primary flex items-center gap-1 transition-all";
+      });
+
+      roleBaristaBtn.addEventListener('click', () => {
+        roleBaristaBtn.className = "px-3 py-1 rounded-full bg-surface-container-lowest text-primary font-bold shadow-sm flex items-center gap-1 transition-all";
+        roleCustomerBtn.className = "px-3 py-1 rounded-full text-on-surface-variant hover:text-primary flex items-center gap-1 transition-all";
+      });
+
+      // Speed Buttons Toggle
+      const speedSlow = document.getElementById('speedSlowBtn');
+      const speedNormal = document.getElementById('speedNormalBtn');
+      const speedFast = document.getElementById('speedFastBtn');
+      const speeds = [speedSlow, speedNormal, speedFast];
+
+      speeds.forEach(btn => {
+        btn.addEventListener('click', () => {
+          speeds.forEach(b => {
+            b.className = "px-2 py-0.5 rounded-full text-on-surface-variant hover:text-primary transition-colors";
+          });
+          btn.className = "px-2 py-0.5 rounded-full bg-surface-container-lowest text-primary font-bold shadow-sm";
+        });
+      });
+
+      // Interactive Mic Recording Trigger Simulation
+      const mainMicBtn = document.getElementById('mainMicBtn');
+      const micPulse = document.getElementById('micPulseRing');
+      const micWaveform = document.getElementById('micWaveform');
+      const micStatusLabel = document.getElementById('micStatusLabel');
+      const micSubtext = document.getElementById('micSubtext');
+      const micIcon = document.getElementById('micIcon');
+      let isRecording = false;
+
+      function toggleRecording() {
+        isRecording = !isRecording;
+        if (isRecording) {
+          // Recording active
+          mainMicBtn.classList.remove('bg-primary');
+          mainMicBtn.classList.add('bg-tertiary');
+          micPulse.classList.remove('hidden');
+          micWaveform.classList.remove('opacity-0');
+          micWaveform.classList.add('opacity-100');
+          micStatusLabel.textContent = "Listening warmly... Speak now!";
+          micStatusLabel.classList.add('text-tertiary');
+          micSubtext.textContent = "Say: 'Hi there! Could I get an iced oat latte...'";
+          micIcon.textContent = "graphic_eq";
+        } else {
+          // Recording done
+          mainMicBtn.classList.remove('bg-tertiary');
+          mainMicBtn.classList.add('bg-primary');
+          micPulse.classList.add('hidden');
+          micWaveform.classList.remove('opacity-100');
+          micWaveform.classList.add('opacity-0');
+          micStatusLabel.textContent = "Analyzing speech flow...";
+          micStatusLabel.classList.remove('text-tertiary');
+          micSubtext.textContent = "Zero hesitations! Match rate 96% 🍵✨";
+          micIcon.textContent = "check";
+
+          setTimeout(() => {
+            micIcon.textContent = "mic";
+            micStatusLabel.textContent = "Tap or Press [Space] to Speak Again";
+            micSubtext.textContent = "Whisk your thoughts straight into sound!";
+          }, 2400);
+        }
+      }
+
+      mainMicBtn.addEventListener('click', toggleRecording);
+
+      // Keyboard shortcut: Space to speak, H for blind mode
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && e.target === document.body) {
+          e.preventDefault();
+          toggleRecording();
+        }
+        if (e.key === 'h' || e.key === 'H') {
+          if (viewBlind.classList.contains('hidden')) {
+            setTranscriptMode('blind');
+          } else {
+            setTranscriptMode('full');
+          }
+        }
+      });
+
+      // Next phrase simulated transition
+      const nextBtn = document.getElementById('dockNextPhraseBtn');
+      nextBtn.addEventListener('click', () => {
+        nextBtn.innerHTML = `<span>Saving Turn...</span>`;
+        setTimeout(() => {
+          nextBtn.innerHTML = `<span>Next Turn</span><span class="material-symbols-outlined text-base">arrow_forward</span>`;
+        }, 1000);
+      });
+    })();
+  </script>
+
+
+</body></html>
