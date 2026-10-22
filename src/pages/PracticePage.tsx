@@ -83,6 +83,16 @@ export default function PracticePage() {
   const otherRole: PracticeRole = role === 0 ? 1 : 0
 
   const partnerTurn = previousPartnerTurn(scenario.turns, activeTurnIndex, userSpeaker)
+  const partnerCue = partnerTurn?.text
+
+  useEffect(() => {
+    if (!partnerCue) return
+
+    speak(partnerCue, { rate: Number(speed), voice: 'Google US English' })
+    return () => cancelSpeech()
+
+  }, [speed, partnerCue, activeTurnIndex, round, role, speak, cancelSpeech])
+
   const userTurn =
     scenario.turns[activeTurnIndex] ??
     scenario.turns[firstUserTurnIndex(scenario.turns, userSpeaker)]
@@ -241,7 +251,7 @@ export default function PracticePage() {
                   name={partnerName}
                   avatarSrc={samAvatar}
                   speedLabel={speed}
-                  onListen={() => speak(cueText, { rate: speedRate })}
+                  onListen={() => speak(cueText, { rate: speedRate, voice: 'Google US English' })}
                 />
               ) : null}
 
@@ -254,7 +264,7 @@ export default function PracticePage() {
                 isHintOpen={isHintOpen}
                 onToggleHint={() => setIsHintOpen((open) => !open)}
                 onListenReference={() =>
-                  speak(userTurn.text, { rate: speedRate })
+                  speak(userTurn.text, { rate: speedRate, voice: 'Google UK English Male' })
                 }
                 onBreakdown={() => speak(userTurn.text, { rate: 0.8 })}
                 highlightWords={highlightWords}
