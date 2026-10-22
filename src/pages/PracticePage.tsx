@@ -26,23 +26,27 @@ import type { Scenario, Turn } from '../types/scenario'
 const scenarios = scenarioData as Scenario[]
 const TOTAL_ROUNDS = 5
 
-function firstUserTurnIndex(turns: Turn[]): number {
-  const index = turns.findIndex((turn) => turn.speaker === 0)
+function firstUserTurnIndex(turns: Turn[], userSpeaker: 0 | 1): number {
+  const index = turns.findIndex((turn) => turn.speaker === userSpeaker)
   return index === -1 ? 0 : index
 }
 
-function nextUserTurnIndex(turns: Turn[], fromIndex: number): number | null {
+function nextUserTurnIndex(turns: Turn[], fromIndex: number, userSpeaker: 0 | 1): number | null {
   for (let index = fromIndex + 1; index < turns.length; index += 1) {
-    if (turns[index].speaker === 0) return index
+    if (turns[index].speaker === userSpeaker) return index
   }
   return null
 }
 
-function previousPartnerTurn(turns: Turn[], activeIndex: number): Turn {
+function previousPartnerTurn(
+  turns: Turn[],
+  activeIndex: number,
+  userSpeaker: 0 | 1,
+): Turn | null {
   for (let index = activeIndex - 1; index >= 0; index -= 1) {
-    if (turns[index].speaker === 1) return turns[index]
+    if (turns[index].speaker !== userSpeaker) return turns[index]
   }
-  return turns[0]
+  return null
 }
 
 function matchLabel(score: number): string {
@@ -58,12 +62,13 @@ export default function PracticePage() {
   const scenario = scenarios.find((item) => item.id === id) ?? scenarios[0]
 
   const [round, setRound] = useState(1)
-  const [activeTurnIndex, setActiveTurnIndex] = useState(() =>
-    firstUserTurnIndex(scenario.turns),
-  )
   const [isSessionComplete, setIsSessionComplete] = useState(false)
 
   const [role, setRole] = useState<PracticeRole>(0)
+
+  const [activeTurnIndex, setActiveTurnIndex] = useState(() =>
+    firstUserTurnIndex(scenario.turns, role),
+  )
   const [transcriptMode, setTranscriptMode] = useState<TranscriptMode>('full')
   const [speed, setSpeed] = useState<PlaybackSpeed>('1.0')
   const [isHintOpen, setIsHintOpen] = useState(false)
@@ -74,11 +79,13 @@ export default function PracticePage() {
   const { speak, cancel: cancelSpeech } = useSpeech()
   const { recordAttempt } = useProgress()
   const recognition = useRecognition({ lang: 'en-US' })
+  const userSpeaker = role
+  const otherRole: PracticeRole = role === 0 ? 1 : 0
 
-  const partnerTurn = previousPartnerTurn(scenario.turns, activeTurnIndex)
+  const partnerTurn = previousPartnerTurn(scenario.turns, activeTurnIndex, userSpeaker)
   const userTurn =
     scenario.turns[activeTurnIndex] ??
-    scenario.turns[firstUserTurnIndex(scenario.turns)]
+    scenario.turns[firstUserTurnIndex(scenario.turns, userSpeaker)]
 
   const upcomingTurns = scenario.turns
     .map((turn, index) => ({ turn, index }))
@@ -88,16 +95,30 @@ export default function PracticePage() {
   const totalSteps = scenario.turns.length
 
   const highlightWords =
-    scenario.id === 'coffee-order' ? ['oat', 'latte'] : []
-  const highlightIpaIndex = scenario.id === 'coffee-order' ? 2 : undefined
+    scenario.id === 'coffee-order' && role === 0 ? ['oat', 'latte'] : []
+  const highlightIpaIndex =
+    scenario.id === 'coffee-order' && role === 0 ? 2 : undefined
 
-  const partnerName = `Sam (${scenario.roles[1]})`
+  const partnerName = `Sam (${scenario.roles[otherRole]})`
   const userRoleLabel = `You (${scenario.roles[role]})`
+  const cueText = partnerTurn?.text ?? userTurn.text
   const speedRate = Number(speed)
   const targetWordCount = userTurn.text
     .trim()
     .split(/\s+/)
     .filter(Boolean).length
+
+  const handleChangeRole = (nextRole: PracticeRole) => {
+    if (nextRole == role) return
+    cancelSpeech()
+    recognition.reset()
+    lastScoredTranscript.current = null
+    setScoreResult(null)
+    setRound(1)
+    setIsSessionComplete(false)
+    setRole(nextRole)
+    setActiveTurnIndex(firstUserTurnIndex(scenario.turns, nextRole))
+  }
 
   // Score once per completed attempt: recognition has stopped and a new
   // transcript is available.
@@ -152,7 +173,7 @@ export default function PracticePage() {
     lastScoredTranscript.current = null
     setScoreResult(null)
 
-    const nextIndex = nextUserTurnIndex(scenario.turns, activeTurnIndex)
+    const nextIndex = nextUserTurnIndex(scenario.turns, activeTurnIndex, userSpeaker)
 
     if (nextIndex !== null) {
       setActiveTurnIndex(nextIndex)
@@ -161,7 +182,7 @@ export default function PracticePage() {
 
     if (round < TOTAL_ROUNDS) {
       setRound((current) => current + 1)
-      setActiveTurnIndex(firstUserTurnIndex(scenario.turns))
+      setActiveTurnIndex(firstUserTurnIndex(scenario.turns, userSpeaker))
       return
     }
 
@@ -182,7 +203,7 @@ export default function PracticePage() {
         <ControlBar
           scenario={scenario}
           role={role}
-          onRoleChange={setRole}
+          onRoleChange={handleChangeRole}
           transcriptMode={transcriptMode}
           onTranscriptModeChange={setTranscriptMode}
           speed={speed}
@@ -214,13 +235,15 @@ export default function PracticePage() {
             ) : null}
 
             <div className="flex flex-col gap-5">
-              <PartnerTurn
-                turn={partnerTurn}
-                name={partnerName}
-                avatarSrc={samAvatar}
-                speedLabel={speed}
-                onListen={() => speak(partnerTurn.text, { rate: speedRate })}
-              />
+              {partnerTurn ? (
+                <PartnerTurn
+                  turn={partnerTurn}
+                  name={partnerName}
+                  avatarSrc={samAvatar}
+                  speedLabel={speed}
+                  onListen={() => speak(cueText, { rate: speedRate })}
+                />
+              ) : null}
 
               <UserTurn
                 turn={userTurn}
@@ -250,9 +273,9 @@ export default function PracticePage() {
                     score={scoreResult.score}
                     message={matchLabel(scoreResult.score)}
                     detail={`${scoreResult.matchedWords.length} of ${targetWordCount} words matched${scoreResult.hesitationCount > 0
-                        ? ` · ${scoreResult.hesitationCount} filler${scoreResult.hesitationCount === 1 ? '' : 's'
-                        }`
-                        : ''
+                      ? ` · ${scoreResult.hesitationCount} filler${scoreResult.hesitationCount === 1 ? '' : 's'
+                      }`
+                      : ''
                       }`}
                     feedbackMessage={scoreResult.feedbackMessage}
                   />
@@ -260,7 +283,7 @@ export default function PracticePage() {
               </UserTurn>
 
               {upcomingTurns.map(({ turn, index }) => {
-                const isPartner = turn.speaker === 1
+                const isPartner = turn.speaker !== userSpeaker
 
                 return (
                   <UpcomingTurn
@@ -280,7 +303,7 @@ export default function PracticePage() {
       <ActionDock
         isRecording={recognition.isListening}
         recordingHint={userTurn.text}
-        onListenAgain={() => speak(partnerTurn.text, { rate: speedRate })}
+        onListenAgain={() => speak(cueText, { rate: speedRate })}
         onReset={handleReset}
         onRecord={handleRecord}
         onNext={handleNextTurn}
