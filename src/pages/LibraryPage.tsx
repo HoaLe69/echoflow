@@ -11,31 +11,15 @@ import LevelTabs from '../features/library/LevelTabs'
 import type { LevelFilter } from '../features/library/LevelTabs'
 import ScenarioCard from '../features/library/ScenarioCard'
 import SearchBar from '../features/library/SearchBar'
-import type { Progress, Scenario } from '../types/scenario'
+import { useProgress } from '../hooks/useProgress'
+import type { Scenario } from '../types/scenario'
 
 const scenarios = scenarioData as Scenario[]
 
-/** Mock progress values live on the page for now (no persistence). */
-const progressById: Record<string, Progress> = {
-  'coffee-order': { reps: 8, fluencyScore: 84, favorite: true },
-  'airport-hotel': { reps: 3, fluencyScore: 68, favorite: false },
-  'team-standup': { reps: 14, fluencyScore: 92, favorite: true },
-  'food-delivery': { reps: 0, favorite: false },
-  'running-late': { reps: 5, fluencyScore: 70, favorite: false },
-  'neighbor-small-talk': { reps: 6, fluencyScore: 78, favorite: false },
-}
-
-const progressNotes: Record<string, string> = {
-  'coffee-order': 'Blind Mode Unlocked',
-  'airport-hotel': 'Next: Practice Speaker B',
-  'team-standup': 'Ready for Live Call ✨',
-  'food-delivery': 'Est. 4 mins',
-  'running-late': 'Cadence flowing',
-  'neighbor-small-talk': 'Rhythm steady',
-}
-
 export default function LibraryPage() {
   const navigate = useNavigate()
+  const { getProgress, toggleFavorite } = useProgress()
+
   const [query, setQuery] = useState('')
   const [level, setLevel] = useState<LevelFilter>('all')
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false)
@@ -64,11 +48,6 @@ export default function LibraryPage() {
   const handlePreviewScript = (scenario: Scenario) => {
     // TODO(me): open the Script preview.
     console.log('preview script', scenario.id)
-  }
-
-  const handleToggleFavorite = (scenario: Scenario) => {
-    // TODO(me): persist the favorite state.
-    console.log('toggle favorite', scenario.id)
   }
 
   const handleCreateLoop = (values: CustomLoopFormValues) => {
@@ -156,16 +135,10 @@ export default function LibraryPage() {
                   <ScenarioCard
                     key={scenario.id}
                     scenario={scenario}
-                    progress={
-                      progressById[scenario.id] ?? {
-                        reps: 0,
-                        favorite: false,
-                      }
-                    }
-                    note={progressNotes[scenario.id]}
+                    progress={getProgress(scenario.id)}
                     onStart={() => handleStart(scenario)}
                     onPreviewScript={() => handlePreviewScript(scenario)}
-                    onToggleFavorite={() => handleToggleFavorite(scenario)}
+                    onToggleFavorite={() => toggleFavorite(scenario.id)}
                   />
                 ))}
               </div>
