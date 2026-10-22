@@ -5,7 +5,7 @@ import type { SegmentedOption } from '../../components/SegmentedControl'
 import type { Level, Scenario } from '../../types/scenario'
 
 export type TranscriptMode = 'full' | 'blur' | 'blind'
-export type PlaybackSpeed = '0.8' | '1.0' | '1.2'
+export type PlaybackSpeed = '0.2' | '0.8' | '1.0' | '1.2'
 export type PracticeRole = 0 | 1
 
 const levelLabels: Record<Level, string> = {
@@ -21,6 +21,7 @@ const transcriptOptions: readonly SegmentedOption<TranscriptMode>[] = [
 ]
 
 const speedOptions: readonly SegmentedOption<PlaybackSpeed>[] = [
+  { value: '0.2', label: '0.2x' },
   { value: '0.8', label: '0.8x' },
   { value: '1.0', label: '1.0x' },
   { value: '1.2', label: '1.2x' },
@@ -93,11 +94,10 @@ export default function ControlBar({
                   type="button"
                   aria-pressed={active}
                   onClick={() => onRoleChange(index)}
-                  className={`focus-ring flex items-center gap-1 rounded-full px-3 py-1 transition-all ${
-                    active
-                      ? 'bg-surface-container-lowest font-bold text-primary shadow-sm'
-                      : 'text-on-surface-variant hover:text-primary'
-                  }`}
+                  className={`focus-ring flex items-center gap-1 rounded-full px-3 py-1 transition-all ${active
+                    ? 'bg-surface-container-lowest font-bold text-primary shadow-sm'
+                    : 'text-on-surface-variant hover:text-primary'
+                    }`}
                 >
                   <Icon
                     name={index === 0 ? 'person' : 'record_voice_over'}
