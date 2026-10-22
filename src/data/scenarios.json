@@ -209,5 +209,71 @@
         "text": "Deal. I'll text you — enjoy your loop!"
       }
     ]
+  },
+  {
+    "id" : "big-project",
+    "title" : "At work : big project",
+    "level" : "a1-a2",
+    "topic": "work",
+    "goal" : "hi",
+    "roles" : ["Tom", "Peter"],
+    "turns" : [
+      {
+        "speaker" : 1,
+        "text" : "Hey Tom, are you working late again?"
+      },
+      {
+        "speaker" : 0,
+        "text" : "Yeah, Peter. I have a big project I'm working on"
+      },
+      {
+        "speaker" : 1,
+        "text" : "How's it going?"
+      },
+      {
+        "speaker" : 0,
+        "text" : "Not well. We keep running into problems with the client."
+      },
+      {
+        "speaker" : 1,
+        "text" : "What kind of problems?"
+      },
+      {
+        "speaker" : 0,
+        "text" : "The client either doesn't like out designs or keeps chaning his mind. It's very frustrating."
+      },
+      {
+        "speaker" : 1,
+        "text" : "That can be very annoying"
+      },
+      {
+        "speaker" : 0,
+        "text" : "It is. My group has start over each time. It such a waste of time and money."
+      },
+      {
+        "speaker" : 1,
+        "text" : "Where is the rest of your group?"
+      },
+      {
+        "speaker" : 0,
+        "text" : "They went to eat. I told them to go. They'er going to bring me back some dinner."
+      },
+      {
+        "speaker" : 1,
+        "text" : "That's good. What are you going to do after your deadline is over?"
+      },
+      {
+        "speaker" : 0,
+        "text" : "Go on a long vacation."
+      },
+      {
+        "speaker" : 1,
+        "text" : "Good for you."
+      },
+      {
+        "speaker" : 0,
+        "text" : "Well, I better get back to work. See you in the morning."
+      }
+    ]
   }
 ]
