@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import Icon from '../../components/Icon'
 import type { Turn } from '../../types/scenario'
-import type { TranscriptMode } from './ControlBar'
+import type { TranscriptMode } from './types'
 
 type UserTurnProps = {
   turn: Turn

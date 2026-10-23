@@ -4,7 +4,7 @@ import Footer from '../components/Footer'
 import Header from '../components/Header'
 import Icon from '../components/Icon'
 import Pill from '../components/Pill'
-import scenarioData from '../data/scenarios.json'
+import { scenarios } from '../data/scenarios'
 import CustomLoopModal from '../features/library/CustomLoopModal'
 import type { CustomLoopFormValues } from '../features/library/CustomLoopModal'
 import LevelTabs from '../features/library/LevelTabs'
@@ -13,8 +13,6 @@ import ScenarioCard from '../features/library/ScenarioCard'
 import SearchBar from '../features/library/SearchBar'
 import { useProgress } from '../hooks/useProgress'
 import type { Scenario } from '../types/scenario'
-
-const scenarios = scenarioData as Scenario[]
 
 export default function LibraryPage() {
   const navigate = useNavigate()

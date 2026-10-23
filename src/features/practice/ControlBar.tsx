@@ -3,10 +3,7 @@ import Pill from '../../components/Pill'
 import SegmentedControl from '../../components/SegmentedControl'
 import type { SegmentedOption } from '../../components/SegmentedControl'
 import type { Level, Scenario } from '../../types/scenario'
-
-export type TranscriptMode = 'full' | 'blur' | 'blind'
-export type PlaybackSpeed = '0.2' | '0.8' | '1.0' | '1.2'
-export type PracticeRole = 0 | 1
+import type { PlaybackSpeed, PracticeRole, TranscriptMode } from './types'
 
 const levelLabels: Record<Level, string> = {
   'a1-a2': 'A2 Beginner',
