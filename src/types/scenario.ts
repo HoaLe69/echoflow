@@ -10,7 +10,8 @@ export type Level = 'a1-a2' | 'b1' | 'b2'
 export type Turn = {
   speaker: 0 | 1
   text: string
-  ipa?: string
+  ipa?: string,
+  audio?: TurnAudio
 }
 
 export type Scenario = {
@@ -22,6 +23,8 @@ export type Scenario = {
   /** [your role, partner role] */
   roles: [string, string]
   turns: Turn[]
+  kind?: 'curated' | 'imported',
+  audioSourceId?: string
 }
 
 export type Progress = {
@@ -29,3 +32,10 @@ export type Progress = {
   fluencyScore?: number
   favorite: boolean
 }
+
+export type TurnAudio = {
+  sourceId: string,
+  startMs: number,
+  endMs: number
+}
+

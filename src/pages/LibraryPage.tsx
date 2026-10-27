@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import Icon from '../components/Icon'
 import Pill from '../components/Pill'
-import { scenarios } from '../data/scenarios'
+import { deleteImportBundle } from '../data/audioRepository'
 import CustomLoopModal from '../features/library/CustomLoopModal'
 import type { CustomLoopFormValues } from '../features/library/CustomLoopModal'
 import LevelTabs from '../features/library/LevelTabs'
@@ -12,15 +12,18 @@ import type { LevelFilter } from '../features/library/LevelTabs'
 import ScenarioCard from '../features/library/ScenarioCard'
 import SearchBar from '../features/library/SearchBar'
 import { useProgress } from '../hooks/useProgress'
+import { useScenarioCatalog } from '../hooks/useScenarioCatalog'
 import type { Scenario } from '../types/scenario'
 
 export default function LibraryPage() {
   const navigate = useNavigate()
   const { getProgress, toggleFavorite } = useProgress()
+  const { scenarios, isLoading, error, reload } = useScenarioCatalog()
 
   const [query, setQuery] = useState('')
   const [level, setLevel] = useState<LevelFilter>('all')
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const needle = query.trim().toLowerCase()
   const filteredScenarios = scenarios.filter((scenario) => {
@@ -52,6 +55,25 @@ export default function LibraryPage() {
     // TODO(me): parse the script and add the custom loop.
     console.log('create custom loop', values)
     setIsCustomModalOpen(false)
+  }
+
+  const handleDelete = async (scenario: Scenario) => {
+    if (!scenario.audioSourceId) return
+    if (!window.confirm(`Delete "${scenario.title}" and its audio?`)) return
+
+    setDeletingId(scenario.id)
+    try {
+      await deleteImportBundle(scenario.id, scenario.audioSourceId)
+      await reload()
+    } catch (deleteError) {
+      window.alert(
+        deleteError instanceof Error
+          ? deleteError.message
+          : 'Could not delete this imported scenario.',
+      )
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   const resetFilters = () => {
@@ -87,6 +109,13 @@ export default function LibraryPage() {
                   <Icon name="add_circle" className="text-lg" />
                   Prepare Custom Loop
                 </button>
+                <Link
+                  to="/import"
+                  className="focus-ring flex items-center justify-center gap-2 rounded-full border border-primary/20 bg-surface-container-lowest px-5 py-2.5 text-sm font-bold text-primary shadow-sm transition-colors hover:bg-matcha-foam"
+                >
+                  <Icon name="audio_file" className="text-lg" />
+                  Import audio
+                </Link>
                 <SearchBar
                   value={query}
                   onChange={setQuery}
@@ -112,8 +141,13 @@ export default function LibraryPage() {
                 </h2>
                 <span aria-live="polite">
                   <Pill tone="primary">
-                    {filteredScenarios.length}{' '}
-                    {filteredScenarios.length === 1 ? 'scenario' : 'scenarios'}
+                    {isLoading
+                      ? 'Loading…'
+                      : `${filteredScenarios.length} ${
+                          filteredScenarios.length === 1
+                            ? 'scenario'
+                            : 'scenarios'
+                        }`}
                   </Pill>
                 </span>
               </div>
@@ -127,6 +161,12 @@ export default function LibraryPage() {
               </div>
             </div>
 
+            {error ? (
+              <p role="alert" className="text-xs font-medium text-error">
+                {error}
+              </p>
+            ) : null}
+
             {filteredScenarios.length > 0 ? (
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                 {filteredScenarios.map((scenario) => (
@@ -134,6 +174,14 @@ export default function LibraryPage() {
                     key={scenario.id}
                     scenario={scenario}
                     progress={getProgress(scenario.id)}
+                    onDelete={
+                      scenario.kind === 'imported'
+                        ? () => {
+                            void handleDelete(scenario)
+                          }
+                        : undefined
+                    }
+                    isDeleting={deletingId === scenario.id}
                     onStart={() => handleStart(scenario)}
                     onPreviewScript={() => handlePreviewScript(scenario)}
                     onToggleFavorite={() => toggleFavorite(scenario.id)}
