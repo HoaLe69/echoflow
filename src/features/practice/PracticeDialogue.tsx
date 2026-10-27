@@ -9,6 +9,7 @@ import UserTurn from './UserTurn'
 import { toFeedbackProps } from './feedback'
 import type { UpcomingTurnItem } from './turnUtils'
 import type { PracticeRole, TranscriptMode } from './types'
+import type { ReactNode } from 'react'
 
 type PracticeDialogueProps = {
   scenario: Scenario
@@ -29,6 +30,7 @@ type PracticeDialogueProps = {
   onListenPartner: () => void
   onListenReference: () => void
   onBreakdown: () => void
+  takeSlot?: ReactNode
 }
 
 export default function PracticeDialogue({
@@ -46,6 +48,7 @@ export default function PracticeDialogue({
   speedLabel,
   isHintOpen,
   scoreResult,
+  takeSlot,
   onToggleHint,
   onListenPartner,
   onListenReference,
@@ -97,6 +100,7 @@ export default function PracticeDialogue({
         ) : null}
 
         {feedback ? <FeedbackBox {...feedback} /> : null}
+        {takeSlot}
       </UserTurn>
 
       {upcomingTurns.map(({ turn, index }) => {
