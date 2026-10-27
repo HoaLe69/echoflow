@@ -20,6 +20,9 @@ type ScenarioCardProps = {
   onStart: () => void
   onPreviewScript: () => void
   onToggleFavorite: () => void
+  /** Imported scenarios only. */
+  onDelete?: () => void
+  isDeleting?: boolean
 }
 
 function firstLearnerTurn(turns: Turn[]): Turn | undefined {
@@ -40,6 +43,8 @@ export default function ScenarioCard({
   onStart,
   onPreviewScript,
   onToggleFavorite,
+  onDelete,
+  isDeleting = false,
 }: ScenarioCardProps) {
   const level = levelCopy[scenario.level]
   const preview = firstLearnerTurn(scenario.turns)
@@ -65,26 +70,42 @@ export default function ScenarioCard({
           </Pill>
           <Pill>{scenario.turns.length} Turns</Pill>
           <Pill>{scenario.topic}</Pill>
+          {scenario.kind === 'imported' ? (
+            <Pill tone="blush">Imported audio</Pill>
+          ) : null}
         </div>
-        <button
-          type="button"
-          onClick={onToggleFavorite}
-          aria-pressed={progress.favorite}
-          aria-label={
-            progress.favorite ? 'Remove from favorites' : 'Add to favorites'
-          }
-          className={`focus-ring -mr-1 -mt-1 rounded-full p-1 transition-colors ${
-            progress.favorite
-              ? 'text-tertiary'
-              : 'text-outline/50 hover:text-tertiary'
-          }`}
-        >
-          <Icon
-            name="favorite"
-            filled={progress.favorite}
-            className="text-lg"
-          />
-        </button>
+        <div className="-mr-1 -mt-1 flex items-center gap-0.5">
+          {onDelete ? (
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={isDeleting}
+              aria-label="Delete imported scenario"
+              className="focus-ring rounded-full p-1 text-outline/50 transition-colors hover:text-error disabled:opacity-40"
+            >
+              <Icon name="delete" className="text-lg" />
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onToggleFavorite}
+            aria-pressed={progress.favorite}
+            aria-label={
+              progress.favorite ? 'Remove from favorites' : 'Add to favorites'
+            }
+            className={`focus-ring rounded-full p-1 transition-colors ${
+              progress.favorite
+                ? 'text-tertiary'
+                : 'text-outline/50 hover:text-tertiary'
+            }`}
+          >
+            <Icon
+              name="favorite"
+              filled={progress.favorite}
+              className="text-lg"
+            />
+          </button>
+        </div>
       </div>
 
       <h3 className="font-headline text-lg font-bold leading-snug text-matcha-forest transition-colors group-hover:text-primary">
