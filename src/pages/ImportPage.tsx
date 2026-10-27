@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Header from "../components/Header";
 import Icon from "../components/Icon";
 import { useAudioImportFlow } from "../features/audio-import/hooks/useAudioImportFlow";
-import { formatDuration } from "../features/audio-import/lib/validateAudioFile";
+import { AUDIO_ACCEPT, formatDuration } from "../features/audio-import/lib/validateAudioFile";
 import { getImportSupport } from "../features/audio-import/lib/support";
 import type {
   DraftTurn,
@@ -99,7 +99,7 @@ export default function ImportPage() {
 
         {flow.step === 'upload' ? (
           <section className="rounded-3xl border border-primary/10 bg-surface-container-lowest p-6 shadow-card">
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/30 bg-surface-container-low px-6 py-12 text-center transition-colors hover:bg-matcha-foam/40">
+            <label className="relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/30 bg-surface-container-low px-6 py-12 text-center transition-colors hover:bg-matcha-foam/40 focus-within:ring-2 focus-within:ring-primary/40">
               <Icon name="audio_file" className="text-3xl text-primary" />
               <span className="text-sm font-bold text-matcha-forest">
                 Choose an audio file
@@ -109,8 +109,9 @@ export default function ImportPage() {
               </span>
               <input
                 type="file"
-                accept="audio/*"
-                className="sr-only"
+                accept={AUDIO_ACCEPT}
+                aria-label="Choose an audio file"
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 onChange={(event) => {
                   const nextFile = event.target.files?.[0]
                   if (nextFile) void flow.chooseFile(nextFile)

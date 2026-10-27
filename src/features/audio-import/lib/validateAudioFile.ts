@@ -1,6 +1,30 @@
 export const MAX_AUDIO_BYTES = 50 * 1024 * 1024
 export const MAX_AUDIO_DURATION_MS = 5 * 60 * 1000
 
+/**
+ * iOS WebKit does not reliably honor `audio/*` in file inputs: supported
+ * audio files can appear greyed out in the Files picker. Listing explicit
+ * MIME types (plus extensions for other browsers) avoids that.
+ */
+export const AUDIO_ACCEPT = [
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/mp4',
+  'audio/x-m4a',
+  'audio/m4a',
+  'audio/x-wav',
+  'audio/wav',
+  'audio/aac',
+  'audio/ogg',
+  'audio/webm',
+  '.mp3',
+  '.m4a',
+  '.wav',
+  '.aac',
+  '.ogg',
+  '.webm',
+].join(',')
+
 export function formatDuration(ms: number): string {
   const totalSeconds = Math.max(0, Math.round(ms / 1000))
   const minutes = Math.floor(totalSeconds / 60)
@@ -16,7 +40,7 @@ export async function inspectAudioFile(
     !file.type.startsWith('audio/') &&
     !/\.(mp3|wav|m4a|aac|ogg|webm)$/i.test(file.name)
   ) {
-    throw new Error('Please choose an audio file (MP3, WAV,M4A, OGG).')
+    throw new Error('Please choose an audio file (MP3, WAV, M4A, OGG).')
   }
   if (file.size > MAX_AUDIO_BYTES) {
     throw new Error('Audio files must be 50 MB or smaller.')
