@@ -1,111 +1,117 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useProgress } from '../../hooks/useProgress'
 import { useRecognition } from '../../hooks/useRecognition'
-import { useSpeech } from '../../hooks/useSpeech'
 import { scorePronunciation } from '../../lib/score'
 import type { ScoreResult } from '../../lib/score'
-import { PARTNER_VOICE, REFERENCE_VOICE } from './constants'
+import type { TurnAudio } from '../../types/scenario'
+import { usePracticeAudio } from './audio/usePracticeAudio'
 
 type PracticeAttemptParams = {
-  scenarioId: string
-  /** Changes whenever the round, role, turn, or completion state changes. */
-  turnKey: string
-  cue: string | null
-  target: string
-  rate: number
-  isActive: boolean
+	scenarioId: string
+	turnKey: string
+	cue: string | null
+	target: string
+	rate: number
+	isActive: boolean
+	audioSourceId?: string
+	cueAudio?: TurnAudio
+	targetAudio?: TurnAudio
 }
 
 export function usePracticeAttempt({
-  scenarioId,
-  turnKey,
-  cue,
-  target,
-  rate,
-  isActive,
+	scenarioId,
+	turnKey,
+	cue,
+	target,
+	rate,
+	isActive,
+	audioSourceId,
+	cueAudio,
+	targetAudio,
 }: PracticeAttemptParams) {
-  const { speak, cancel } = useSpeech()
-  const { recordAttempt } = useProgress()
-  const {
-    start: startRecognition,
-    stop: stopRecognition,
-    reset: resetRecognition,
-    isListening,
-    isSupported,
-    transcript,
-    error,
-  } = useRecognition({ lang: 'en-US' })
+	const { recordAttempt } = useProgress()
+	const {
+		start: startRecognition,
+		stop: stopRecognition,
+		reset: resetRecognition,
+		isListening,
+		isSupported,
+		transcript,
+		error,
+	} = useRecognition({ lang: 'en-US' })
 
-  const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null)
-  const lastScored = useRef<string | null>(null)
-  const rateRef = useRef(rate)
+	const audio = usePracticeAudio({
+		sourceId: audioSourceId,
+		cueAudio,
+		targetAudio,
+		cueText: cue,
+		targetText: target,
+		rate,
+	})
 
-  useEffect(() => {
-    rateRef.current = rate
-  }, [rate])
+	const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null)
+	const lastScored = useRef<string | null>(null)
+	const playCueRef = useRef(audio.playCue)
+	const stopAudioRef = useRef(audio.stop)
 
-  const resetAttempt = useCallback(() => {
-    cancel()
-    resetRecognition()
-    lastScored.current = null
-    setScoreResult(null)
-  }, [cancel, resetRecognition])
+	useEffect(() => {
+		playCueRef.current = audio.playCue
+		stopAudioRef.current = audio.stop
+	}, [audio.playCue, audio.stop])
 
-  // New turn/role/round: auto-play the cue. The page resets the previous
-  // attempt from its event handlers, so this effect only touches audio.
-  // Speed changes do not re-trigger this; they apply to the next playback.
-  useEffect(() => {
-    if (!isActive || !cue) return
+	const resetAttempt = useCallback(() => {
+		audio.stop()
+		resetRecognition()
+		lastScored.current = null
+		setScoreResult(null)
+	}, [audio, resetRecognition])
 
-    speak(cue, { rate: rateRef.current, voice: PARTNER_VOICE })
+	// New turn/role/round: auto-play the cue from native audio or TTS.
+	useEffect(() => {
+		if (!isActive || !cue) return
+		if (audio.isNative && !audio.clipReady) return
 
-    return () => cancel()
-  }, [turnKey, cue, isActive, speak, cancel])
+		playCueRef.current()
+		return () => stopAudioRef.current()
+	}, [turnKey, cue, isActive, audio.isNative, audio.clipReady])
 
-  // Score once per completed transcript.
-  useEffect(() => {
-    if (isListening) return
+	// Score once per completed transcript.
+	useEffect(() => {
+		if (isListening) return
 
-    const spoken = transcript.trim()
-    if (!spoken || spoken === lastScored.current) return
+		const spoken = transcript.trim()
+		if (!spoken || spoken === lastScored.current) return
 
-    lastScored.current = spoken
-    const result = scorePronunciation(target, spoken)
-    setScoreResult(result)
-    recordAttempt(scenarioId, { fluencyScore: result.score })
-  }, [isListening, transcript, target, scenarioId, recordAttempt])
+		lastScored.current = spoken
+		const result = scorePronunciation(target, spoken)
+		setScoreResult(result)
+		recordAttempt(scenarioId, { fluencyScore: result.score })
+	}, [isListening, transcript, target, scenarioId, recordAttempt])
 
-  const toggleRecording = () => {
-    if (!isSupported || !isActive) return
+	const toggleRecording = () => {
+		if (!isSupported || !isActive) return
 
-    if (isListening) {
-      stopRecognition()
-      return
-    }
+		if (isListening) {
+			stopRecognition()
+			return
+		}
 
-    cancel()
-    lastScored.current = null
-    setScoreResult(null)
-    startRecognition()
-  }
+		audio.stop()
+		lastScored.current = null
+		setScoreResult(null)
+		startRecognition()
+	}
 
-  const playPartner = () =>
-    speak(cue ?? target, { rate, voice: PARTNER_VOICE })
-
-  const playReference = () =>
-    speak(target, { rate, voice: REFERENCE_VOICE })
-
-  const playBreakdown = () => speak(target, { rate: 0.8 })
-
-  return {
-    scoreResult,
-    isListening,
-    isSupported,
-    error,
-    toggleRecording,
-    resetAttempt,
-    playPartner,
-    playReference,
-    playBreakdown,
-  }
+	return {
+		scoreResult,
+		isListening,
+		isSupported,
+		error,
+		audioError: audio.clipError,
+		toggleRecording,
+		resetAttempt,
+		playPartner: audio.playCue,
+		playReference: audio.playReference,
+		playBreakdown: audio.playBreakdown,
+	}
 }
