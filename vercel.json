@@ -15,5 +15,11 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/((?!assets/|models/|.*\\..*).*)",
+      "destination": "/index.html"
+    }
   ]
 }
