@@ -111,6 +111,25 @@ function PracticeSession({ scenario }: { scenario: Scenario }) {
               isComplete={session.isComplete}
               totalRounds={TOTAL_ROUNDS}
             />
+
+            {attempt.autoplayBlocked && session.partnerTurn ? (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary-fixed bg-matcha-foam px-4 py-3">
+                <div className="text-xs text-primary">
+                  <p className="font-bold">Your browser blocked autoplay.</p>
+                  <p className="text-matcha-sage">
+                    Tap once to hear the partner line; later turns play
+                    automatically.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={attempt.playPartner}
+                  className="focus-ring rounded-full bg-primary px-3.5 py-1.5 text-[11px] font-bold text-on-primary shadow-sm"
+                >
+                  Play partner line
+                </button>
+              </div>
+            ) : null}
             <PracticeDialogue
               scenario={scenario}
               role={session.role}

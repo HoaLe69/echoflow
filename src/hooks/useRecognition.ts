@@ -111,92 +111,129 @@ export function useRecognition(
   }, [options])
 
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
+  const generationRef = useRef(0)
   const finalTranscriptRef = useRef('')
   const lastReportedRef = useRef('')
   const lastConfidenceRef = useRef(0)
   const listeningRef = useRef(false)
 
-  const ensureRecognition = useCallback((): SpeechRecognitionLike | null => {
-    if (!RecognitionConstructor) return null
-    if (recognitionRef.current) return recognitionRef.current
+  const disposeRecognition = useCallback(
+    (recognition: SpeechRecognitionLike | null) => {
+      if (!recognition) return
 
-    const recognition = new RecognitionConstructor()
+      recognition.onstart = null
+      recognition.onresult = null
+      recognition.onerror = null
+      recognition.onend = null
 
-    recognition.onstart = () => {
-      listeningRef.current = true
-      setIsListening(true)
-    }
+      try {
+        recognition.abort()
+      } catch {
+        // Already stopped.
+      }
+    },
+    [],
+  )
 
-    recognition.onresult = (event) => {
-      let finalText = finalTranscriptRef.current
-      let interimText = ''
-      let confidence = lastConfidenceRef.current
+  const createRecognition = useCallback(
+    (generation: number): SpeechRecognitionLike | null => {
+      if (!RecognitionConstructor) return null
 
-      for (
-        let index = event.resultIndex;
-        index < event.results.length;
-        index += 1
-      ) {
-        const result = event.results[index]
-        const alternative = result[0]
-        if (!alternative) continue
+      const recognition = new RecognitionConstructor()
 
-        if (result.isFinal) {
-          finalText = `${finalText} ${alternative.transcript}`.trim()
-          confidence = alternative.confidence
-        } else {
-          interimText = `${interimText} ${alternative.transcript}`.trim()
+      recognition.onstart = () => {
+        if (generation !== generationRef.current) return
+        listeningRef.current = true
+        setIsListening(true)
+      }
+
+      recognition.onresult = (event) => {
+        if (generation !== generationRef.current) return
+
+        let finalText = finalTranscriptRef.current
+        let interimText = ''
+        let confidence = lastConfidenceRef.current
+
+        for (
+          let index = event.resultIndex;
+          index < event.results.length;
+          index += 1
+        ) {
+          const result = event.results[index]
+          const alternative = result[0]
+          if (!alternative) continue
+
+          if (result.isFinal) {
+            finalText = `${finalText} ${alternative.transcript}`.trim()
+            confidence = alternative.confidence
+          } else {
+            interimText = `${interimText} ${alternative.transcript}`.trim()
+          }
+        }
+
+        finalTranscriptRef.current = finalText
+        lastConfidenceRef.current = confidence
+        setTranscript(`${finalText} ${interimText}`.trim())
+
+        if (finalText && finalText !== lastReportedRef.current) {
+          lastReportedRef.current = finalText
+          optionsRef.current.onResult?.({ transcript: finalText, confidence })
         }
       }
 
-      finalTranscriptRef.current = finalText
-      lastConfidenceRef.current = confidence
-      setTranscript(`${finalText} ${interimText}`.trim())
+      recognition.onerror = (event) => {
+        if (generation !== generationRef.current) return
+        // Aborts are expected when stop()/reset() run.
+        if (event.error === 'aborted') return
 
-      if (finalText && finalText !== lastReportedRef.current) {
-        lastReportedRef.current = finalText
-        optionsRef.current.onResult?.({ transcript: finalText, confidence })
+        const message =
+          errorMessages[event.error] ??
+          event.message ??
+          'Speech recognition failed.'
+
+        listeningRef.current = false
+        recognitionRef.current = null
+        setIsListening(false)
+        setError(message)
+        optionsRef.current.onError?.(message)
       }
-    }
 
-    recognition.onerror = (event) => {
-      // Aborts are expected when stop()/reset() run.
-      if (event.error === 'aborted') return
+      recognition.onend = () => {
+        if (generation !== generationRef.current) return
 
-      const message =
-        errorMessages[event.error] ??
-        event.message ??
-        'Speech recognition failed.'
+        listeningRef.current = false
+        recognitionRef.current = null
+        setIsListening(false)
 
-      listeningRef.current = false
-      setIsListening(false)
-      setError(message)
-      optionsRef.current.onError?.(message)
-    }
-
-    recognition.onend = () => {
-      listeningRef.current = false
-      setIsListening(false)
-
-      // Some browsers end without emitting a final result event.
-      const finalText = finalTranscriptRef.current
-      if (finalText && finalText !== lastReportedRef.current) {
-        lastReportedRef.current = finalText
-        optionsRef.current.onResult?.({
-          transcript: finalText,
-          confidence: lastConfidenceRef.current,
-        })
+        // Some browsers end without emitting a final result event.
+        const finalText = finalTranscriptRef.current
+        if (finalText && finalText !== lastReportedRef.current) {
+          lastReportedRef.current = finalText
+          optionsRef.current.onResult?.({
+            transcript: finalText,
+            confidence: lastConfidenceRef.current,
+          })
+        }
       }
-    }
 
-    recognitionRef.current = recognition
-    return recognition
-  }, [])
+      return recognition
+    },
+    [],
+  )
 
   const start = useCallback(() => {
-    const recognition = ensureRecognition()
-    if (!recognition || listeningRef.current) return
+    if (!RecognitionConstructor || listeningRef.current) return
 
+    // iOS WebKit can stop delivering results on a recognizer instance after
+    // media playback. Use a fresh instance for every attempt.
+    disposeRecognition(recognitionRef.current)
+    recognitionRef.current = null
+
+    const generation = ++generationRef.current
+    const recognition = createRecognition(generation)
+    if (!recognition) return
+
+    recognitionRef.current = recognition
     finalTranscriptRef.current = ''
     lastReportedRef.current = ''
     lastConfidenceRef.current = 0
@@ -219,57 +256,51 @@ export function useRecognition(
           : 'Unable to start speech recognition.'
 
       listeningRef.current = false
+      recognitionRef.current = null
+      disposeRecognition(recognition)
       setIsListening(false)
       setError(message)
       optionsRef.current.onError?.(message)
     }
-  }, [ensureRecognition])
+  }, [createRecognition, disposeRecognition])
 
   const stop = useCallback(() => {
-    if (!recognitionRef.current) return
+    const recognition = recognitionRef.current
+    if (!recognition) return
 
     try {
-      recognitionRef.current.stop()
+      recognition.stop()
     } catch {
       // Stopping an already-ended session throws in some browsers.
+      listeningRef.current = false
+      setIsListening(false)
     }
   }, [])
 
   const reset = useCallback(() => {
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.abort()
-      } catch {
-        // Already stopped.
-      }
-    }
+    generationRef.current += 1
+
+    const recognition = recognitionRef.current
+    recognitionRef.current = null
+    listeningRef.current = false
+    disposeRecognition(recognition)
 
     finalTranscriptRef.current = ''
     lastReportedRef.current = ''
     lastConfidenceRef.current = 0
-    listeningRef.current = false
     setIsListening(false)
     setTranscript('')
     setError(null)
-  }, [])
+  }, [disposeRecognition])
 
   useEffect(() => {
     return () => {
+      generationRef.current += 1
       const recognition = recognitionRef.current
-      if (!recognition) return
-
-      recognition.onstart = null
-      recognition.onend = null
-      recognition.onresult = null
-      recognition.onerror = null
-
-      try {
-        recognition.abort()
-      } catch {
-        // Already stopped.
-      }
+      recognitionRef.current = null
+      disposeRecognition(recognition)
     }
-  }, [])
+  }, [disposeRecognition])
 
   return {
     start,

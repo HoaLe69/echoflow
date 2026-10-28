@@ -15,10 +15,31 @@ function formatDuration(ms: number): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 }
 
+function isIOSDevice(): boolean {
+  if (typeof navigator === 'undefined') return false
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  )
+}
+
 function TakePlayer({ src, durationMs }: { src: string; durationMs: number }) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
+
+  // iOS WebKit needs a real, visible media control to reliably start playback
+  // on the first tap. The custom button can require two taps there.
+  if (isIOSDevice()) {
+    return (
+      <audio
+        controls
+        preload="auto"
+        src={src}
+        className="mt-2 w-full"
+      />
+    )
+  }
 
   const togglePlayback = () => {
     const audio = audioRef.current
@@ -28,7 +49,7 @@ function TakePlayer({ src, durationMs }: { src: string; durationMs: number }) {
       if (audio.ended || audio.currentTime >= audio.duration) {
         audio.currentTime = 0
       }
-      void audio.play()
+      void audio.play().catch(() => setIsPlaying(false))
     } else {
       audio.pause()
     }
@@ -70,8 +91,8 @@ function TakePlayer({ src, durationMs }: { src: string; durationMs: number }) {
       <audio
         ref={audioRef}
         src={src}
-        preload="metadata"
-        className="hidden"
+        preload="auto"
+        className="sr-only"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={() => {

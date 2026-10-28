@@ -62,6 +62,7 @@ export function usePracticeAudio({
     isNative,
     clipReady: clip.isReady,
     clipError: clip.error,
+    autoplayBlocked: clip.autoplayBlocked,
     playCue,
     playReference,
     playBreakdown,

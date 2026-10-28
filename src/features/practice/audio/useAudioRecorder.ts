@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 
-const MIME_TYPES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4']
+const MIME_TYPES = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm']
 
 function supportsRecording(): boolean {
   return (
@@ -72,6 +72,9 @@ export function useAudioRecorder() {
 
     // reset
     startingRef.current = true
+    // Hide the previous take immediately so its audio element is removed
+    // before iOS switches the audio session back to recording.
+    setIsRecording(true)
     setError(null)
     revokeUrl()
     setAudioUrl(null)
@@ -81,6 +84,7 @@ export function useAudioRecorder() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       if (!startingRef.current) {
         stream.getTracks().forEach((track) => track.stop())
+        setIsRecording(false)
         return
       }
       streamRef.current = stream
@@ -126,8 +130,9 @@ export function useAudioRecorder() {
         setIsRecording(false)
       }
       recorderRef.current = recorder
-      recorder.start()
-      setIsRecording(true)
+      // Collect chunks periodically; some mobile browsers deliver the final
+      // blob only after an explicit data chunk has already been produced.
+      recorder.start(250)
       startingRef.current = false
     } catch (startError) {
       startingRef.current = false
@@ -144,7 +149,14 @@ export function useAudioRecorder() {
 
   const stop = useCallback(() => {
     const recorder = recorderRef.current
-    if (!recorder || recorder.state === 'inactive') return
+    if (!recorder) {
+      if (startingRef.current) {
+        startingRef.current = false
+        setIsRecording(false)
+      }
+      return
+    }
+    if (recorder.state === 'inactive') return
 
     try {
       recorder.stop()

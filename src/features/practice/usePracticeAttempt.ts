@@ -112,6 +112,11 @@ export function usePracticeAttempt({
     if (!isSupported && !recorderSupported) return
 
     audio.stop()
+    // Make sure the take player and any lingering media are paused before
+    // iOS switches the audio session back to the microphone.
+    document.querySelectorAll<HTMLAudioElement>('audio').forEach((element) => {
+      if (!element.paused) element.pause()
+    })
     lastScored.current = null
     setScoreResult(null)
 
@@ -137,6 +142,7 @@ export function usePracticeAttempt({
     recordingUrl,
     recordingDurationMs,
     recorderError,
-    recorderSupported
+    recorderSupported,
+    autoplayBlocked: audio.autoplayBlocked
   }
 }

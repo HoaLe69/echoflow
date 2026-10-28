@@ -9,6 +9,7 @@ type AudioError = {
 export function useAudioClipPlayer(sourceId: string | undefined) {
   const [loadedSourceId, setLoadedSourceId] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false)
   const [audioError, setAudioError] = useState<AudioError | null>(null)
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -36,13 +37,17 @@ export function useAudioClipPlayer(sourceId: string | undefined) {
         const audio = new Audio(url)
         audio.preload = 'auto'
 
-        audio.addEventListener('play', () => setIsPlaying(true))
+        audio.addEventListener('play', () => {
+          setIsPlaying(true)
+          setAutoplayBlocked(false)
+        })
         audio.addEventListener('pause', () => setIsPlaying(false))
         audio.addEventListener('ended', () => setIsPlaying(false))
 
         audioRef.current = audio
         urlRef.current = url
         setLoadedSourceId(sourceId)
+        setAutoplayBlocked(false)
         setAudioError(null)
       })
       .catch((loadError) => {
@@ -108,9 +113,10 @@ export function useAudioClipPlayer(sourceId: string | undefined) {
       }
 
       void audio.play().catch((playError) => {
-        // Browsers can block programmatic autoplay until a user gesture.
-        // The Listen button still works, so don't surface this as an error.
+        // Mobile browsers require a user gesture before audio can start.
+        // Surface a retry banner instead of failing silently.
         if (playError instanceof Error && playError.name === 'NotAllowedError') {
+          setAutoplayBlocked(true)
           return
         }
 
@@ -132,5 +138,12 @@ export function useAudioClipPlayer(sourceId: string | undefined) {
   const error =
     sourceId && audioError?.sourceId === sourceId ? audioError.message : null
 
-  return { isReady, isPlaying, error, playSegment, stop }
+  return {
+    isReady,
+    isPlaying,
+    autoplayBlocked,
+    error,
+    playSegment,
+    stop,
+  }
 }
