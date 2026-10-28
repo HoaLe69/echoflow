@@ -15,7 +15,7 @@ export default function PracticeNotices({
     error ??
     (isSupported
       ? null
-      : 'Speech recognition is not available in this browser. Try Chrome or Edge.')
+      : 'Voice input is not available in this browser. Try Chrome or Edge.')
 
   return (
     <>

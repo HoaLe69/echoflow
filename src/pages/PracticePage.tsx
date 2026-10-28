@@ -135,8 +135,13 @@ function PracticeSession({ scenario }: { scenario: Scenario }) {
                   audioUrl={attempt.recordingUrl}
                   durationMs={attempt.recordingDurationMs}
                   transcript={attempt.spokenTranscript}
+                  transcriptLabel={attempt.transcriptLabel}
                   isRecording={attempt.isRecording}
-                  recognitionSupported={attempt.isSupported}
+                  isTranscribing={attempt.isTranscribing}
+                  transcriptionStatus={attempt.transcriptionStatus}
+                  transcriptionProgress={attempt.transcriptionProgress}
+                  transcriptionError={attempt.transcriptionError}
+                  transcriptionSupported={attempt.isSupported}
                   error={attempt.recorderError}
                 />
               }

@@ -1,12 +1,18 @@
 import { useRef, useState } from 'react'
 import Icon from '../../components/Icon'
+import type { TranscriptionStatus } from '../transcription/useTranscriber'
 
 type MyTakeCardProps = {
   audioUrl: string | null
   durationMs: number
   transcript: string
+  transcriptLabel: string
   isRecording: boolean
-  recognitionSupported: boolean
+  isTranscribing: boolean
+  transcriptionStatus: TranscriptionStatus
+  transcriptionProgress: number
+  transcriptionError: string | null
+  transcriptionSupported: boolean
   error: string | null
 }
 
@@ -97,12 +103,25 @@ export default function MyTakeCard({
   audioUrl,
   durationMs,
   transcript,
+  transcriptLabel,
   isRecording,
-  recognitionSupported,
+  isTranscribing,
+  transcriptionStatus,
+  transcriptionProgress,
+  transcriptionError,
+  transcriptionSupported,
   error,
 }: MyTakeCardProps) {
   if (isRecording) return null
-  if (!audioUrl && !transcript && !error) return null
+  if (
+    !audioUrl &&
+    !transcript &&
+    !error &&
+    !isTranscribing &&
+    !transcriptionError
+  ) {
+    return null
+  }
 
   return (
     <section
@@ -125,18 +144,57 @@ export default function MyTakeCard({
         <TakePlayer key={audioUrl} src={audioUrl} durationMs={durationMs} />
       ) : null}
 
-      <div className="mt-3 rounded-xl border border-primary/5 bg-surface-container-lowest p-3">
-        <div className="text-[10px] font-bold uppercase tracking-wide text-outline">
-          Browser heard
+      {isTranscribing ? (
+        <div
+          aria-live="polite"
+          className="mt-3 rounded-xl border border-primary/5 bg-surface-container-lowest p-3"
+        >
+          <div className="text-[10px] font-bold uppercase tracking-wide text-outline">
+            {transcriptionStatus === 'loading-model'
+              ? 'Preparing Whisper'
+              : 'Transcribing'}
+          </div>
+          <p className="mt-1 text-xs font-semibold text-primary">
+            {transcriptionStatus === 'loading-model'
+              ? 'Loading the on-device model…'
+              : 'Listening to your take…'}
+          </p>
+          {transcriptionStatus === 'transcribing' ? (
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-container-highest">
+              <div
+                className="h-full rounded-full bg-primary transition-[width]"
+                style={{ width: `${transcriptionProgress}%` }}
+              />
+            </div>
+          ) : (
+            <p className="mt-1 text-[10px] leading-relaxed text-outline">
+              First use downloads about 60 MB. It stays in your browser.
+            </p>
+          )}
         </div>
-        <p className="mt-1 text-xs italic leading-relaxed text-matcha-forest">
-          {recognitionSupported
-            ? transcript
-              ? `“${transcript}”`
-              : 'No speech was detected.'
-            : 'Transcript is not available in this browser.'}
-        </p>
-      </div>
+      ) : transcriptionError ? (
+        <div className="mt-3 rounded-xl border border-error/20 bg-error-container p-3">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-on-error-container">
+            Transcription failed
+          </div>
+          <p className="mt-1 text-xs text-on-error-container">
+            {transcriptionError}
+          </p>
+        </div>
+      ) : (
+        <div className="mt-3 rounded-xl border border-primary/5 bg-surface-container-lowest p-3">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-outline">
+            {transcriptLabel}
+          </div>
+          <p className="mt-1 text-xs italic leading-relaxed text-matcha-forest">
+            {transcriptionSupported
+              ? transcript
+                ? `“${transcript}”`
+                : 'No speech was detected.'
+              : 'Transcript is not available in this browser.'}
+          </p>
+        </div>
+      )}
 
       {error ? (
         <p className="mt-2 text-[11px] font-medium text-error">{error}</p>
