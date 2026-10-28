@@ -1,5 +1,5 @@
 import type { DraftTurn } from "../types";
-import type { RawTranscriptSegment } from "./types";
+import type { RawTranscriptSegment } from "../../transcription/types";
 
 /**
  * Whisper does not provide diarization. Alternate A/B as an initial guess

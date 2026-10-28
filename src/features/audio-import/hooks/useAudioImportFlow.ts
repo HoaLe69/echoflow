@@ -18,7 +18,7 @@ import type {
   SpeakerLabel
 } from '../types'
 
-import { useTranscriber } from "./useTranscriber";
+import { useTranscriber } from "../../transcription/useTranscriber";
 
 export function useAudioImportFlow() {
   const [step, setStep] = useState<ImportStep>('upload')

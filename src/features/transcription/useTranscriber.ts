@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type {
   TranscriptionProvider,
   TranscriptResult
-} from '../transcription/types'
+} from './types'
 
 export type TranscriptionStatus =
   | 'idle'
@@ -21,7 +21,7 @@ export function useTranscriber() {
     if (!providerRef.current) {
       // Keep the ~1.5 MB whisper.cpp worker bundle out of the initial load.
       const { createTranscribeJsProvider } = await import(
-        '../transcription/transcribeJsProvider'
+        './transcribeJsProvider'
       )
       providerRef.current = createTranscribeJsProvider(setProgress)
     }
