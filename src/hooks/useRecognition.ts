@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+function isIOSDevice(): boolean {
+  if (typeof navigator === 'undefined') return false
+
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  )
+}
+
 export type RecognitionResult = {
   transcript: string
   confidence: number
@@ -197,6 +206,15 @@ export function useRecognition(
     const recognition = ensureRecognition()
     if (!recognition || listeningRef.current) return
 
+    if (isIOSDevice()) {
+      const message =
+        'Speech recognition is not supported on iPhone/iPad Safari. Please use a desktop browser or type your answer.'
+
+      setError(message)
+      optionsRef.current.onError?.(message)
+      return
+    }
+
     finalTranscriptRef.current = ''
     lastReportedRef.current = ''
     lastConfidenceRef.current = 0
@@ -276,8 +294,9 @@ export function useRecognition(
     stop,
     reset,
     isListening,
-    isSupported: RecognitionConstructor !== null,
+    isSupported: RecognitionConstructor !== null && !isIOSDevice(),
     transcript,
     error,
   }
 }
+
