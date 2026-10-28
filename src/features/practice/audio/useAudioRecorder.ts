@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-
 const MIME_TYPES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4']
+
+function isIOSDevice(): boolean {
+  if (typeof navigator === 'undefined') return false
+
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  )
+}
 
 function supportsRecording(): boolean {
   return (
@@ -14,7 +22,12 @@ function supportsRecording(): boolean {
 function pickMimeType(): string | undefined {
   if (typeof MediaRecorder == 'undefined') return undefined
   if (typeof MediaRecorder.isTypeSupported !== 'function') return undefined
-  return MIME_TYPES.find(type => MediaRecorder.isTypeSupported(type))
+
+  const preferredMimeTypes = isIOSDevice()
+    ? ['audio/mp4', 'audio/m4a', 'audio/webm;codecs=opus', 'audio/webm']
+    : ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4']
+
+  return preferredMimeTypes.find((type) => MediaRecorder.isTypeSupported(type))
 }
 
 export function useAudioRecorder() {
@@ -23,7 +36,6 @@ export function useAudioRecorder() {
   const [durationMs, setDurationMs] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const isSupported = supportsRecording()
-
 
   const recorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -34,7 +46,7 @@ export function useAudioRecorder() {
   const urlRef = useRef<string | null>(null)
 
   const stopStream = useCallback(() => {
-    streamRef.current?.getTracks().forEach(track => track.stop())
+    streamRef.current?.getTracks().forEach((track) => track.stop())
     streamRef.current = null
   }, [])
 
@@ -52,7 +64,6 @@ export function useAudioRecorder() {
     if (recorder && recorder.state !== 'inactive') {
       try {
         recorder.stop()
-
       } catch {
         // Recorder already stopped
       }
@@ -66,11 +77,9 @@ export function useAudioRecorder() {
     setIsRecording(false)
   }, [revokeUrl, stopStream])
 
-
   const start = useCallback(async () => {
     if (!isSupported || startingRef.current || isRecording) return
 
-    // reset
     startingRef.current = true
     setError(null)
     revokeUrl()
@@ -78,23 +87,31 @@ export function useAudioRecorder() {
     setDurationMs(0)
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      })
+
       if (!startingRef.current) {
         stream.getTracks().forEach((track) => track.stop())
         return
       }
-      streamRef.current = stream
 
+      streamRef.current = stream
       const mimeType = pickMimeType()
 
       const recorder = mimeType
         ? new MediaRecorder(stream, { mimeType })
         : new MediaRecorder(stream)
+
       const generation = ++generationRef.current
       chunkRef.current = []
       startTimeRef.current = performance.now()
 
-      recorder.ondataavailable = event => {
+      recorder.ondataavailable = (event) => {
         if (event.data.size > 0) chunkRef.current.push(event.data)
       }
 
@@ -103,15 +120,18 @@ export function useAudioRecorder() {
         stopStream()
         setIsRecording(false)
         recorderRef.current = null
+
         if (generation !== generationRef.current) return
 
         const blob = new Blob(chunkRef.current, {
-          type: recorder.mimeType || mimeType || 'audio/webm'
+          type: recorder.mimeType || mimeType || 'audio/mp4',
         })
         chunkRef.current = []
 
         if (blob.size === 0) {
-          setError('No audio was captured.')
+          revokeUrl()
+          setAudioUrl(null)
+          setError('No audio was captured. Please try again or use a different browser.')
           return
         }
 
@@ -122,9 +142,12 @@ export function useAudioRecorder() {
       }
 
       recorder.onerror = () => {
-        setError('Audio recording failed.')
+        revokeUrl()
+        setAudioUrl(null)
+        setError('Audio recording failed. Please try again.')
         setIsRecording(false)
       }
+
       recorderRef.current = recorder
       recorder.start()
       setIsRecording(true)
@@ -136,9 +159,8 @@ export function useAudioRecorder() {
       setError(
         startError instanceof Error
           ? startError.message
-          : 'Microphone access was denied'
+          : 'Microphone access was denied',
       )
-
     }
   }, [isRecording, isSupported, revokeUrl, stopStream])
 
@@ -152,7 +174,6 @@ export function useAudioRecorder() {
       setIsRecording(false)
       stopStream()
     }
-
   }, [stopStream])
 
   useEffect(() => {
@@ -169,12 +190,13 @@ export function useAudioRecorder() {
           // Already stopped
         }
       }
-      streamRef.current?.getTracks().forEach(track => track.stop())
+      streamRef.current?.getTracks().forEach((track) => track.stop())
       streamRef.current = null
       if (urlRef.current) URL.revokeObjectURL(urlRef.current)
       urlRef.current = null
     }
   }, [])
+
   return {
     isSupported,
     isRecording,
@@ -183,6 +205,185 @@ export function useAudioRecorder() {
     error,
     start,
     stop,
-    reset
+    reset,
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
