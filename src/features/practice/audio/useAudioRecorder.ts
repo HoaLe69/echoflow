@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const MIME_TYPES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4']
+//const MIME_TYPES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4']
 
 function isIOSDevice(): boolean {
   if (typeof navigator === 'undefined') return false
