@@ -33,6 +33,7 @@ function pickMimeType(): string | undefined {
 export function useAudioRecorder() {
   const [isRecording, setIsRecording] = useState(false)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [durationMs, setDurationMs] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const isSupported = supportsRecording()
@@ -72,6 +73,7 @@ export function useAudioRecorder() {
     chunkRef.current = []
     revokeUrl()
     setAudioUrl(null)
+    setAudioBlob(null)
     setDurationMs(0)
     setError(null)
     setIsRecording(false)
@@ -84,6 +86,7 @@ export function useAudioRecorder() {
     setError(null)
     revokeUrl()
     setAudioUrl(null)
+    setAudioBlob(null)
     setDurationMs(0)
 
     try {
@@ -131,12 +134,14 @@ export function useAudioRecorder() {
         if (blob.size === 0) {
           revokeUrl()
           setAudioUrl(null)
+          setAudioBlob(null)
           setError('No audio was captured. Please try again or use a different browser.')
           return
         }
 
         const url = URL.createObjectURL(blob)
         urlRef.current = url
+        setAudioBlob(blob)
         setAudioUrl(url)
         setDurationMs(elapsed)
       }
@@ -144,12 +149,13 @@ export function useAudioRecorder() {
       recorder.onerror = () => {
         revokeUrl()
         setAudioUrl(null)
+        setAudioBlob(null)
         setError('Audio recording failed. Please try again.')
         setIsRecording(false)
       }
 
       recorderRef.current = recorder
-      recorder.start()
+      recorder.start(250)
       setIsRecording(true)
       startingRef.current = false
     } catch (startError) {
@@ -201,6 +207,7 @@ export function useAudioRecorder() {
     isSupported,
     isRecording,
     audioUrl,
+    audioBlob,
     durationMs,
     error,
     start,
