@@ -28,3 +28,4 @@ dist-ssr
 public/models/*.bin
 .vercel
 .env*
+!.env.example

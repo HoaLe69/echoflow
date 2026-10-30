@@ -5,6 +5,8 @@ import Header from '../components/Header'
 import Icon from '../components/Icon'
 import Pill from '../components/Pill'
 import { deleteImportBundle } from '../data/audioRepository'
+import SyncDialog from '../features/dropbox/SyncDialog'
+import { useDropboxSync } from '../features/dropbox/useDropboxSync'
 import CustomLoopModal from '../features/library/CustomLoopModal'
 import type { CustomLoopFormValues } from '../features/library/CustomLoopModal'
 import LevelTabs from '../features/library/LevelTabs'
@@ -19,6 +21,7 @@ export default function LibraryPage() {
   const navigate = useNavigate()
   const { getProgress, toggleFavorite } = useProgress()
   const { scenarios, isLoading, error, reload } = useScenarioCatalog()
+  const sync = useDropboxSync()
 
   const [query, setQuery] = useState('')
   const [level, setLevel] = useState<LevelFilter>('all')
@@ -83,7 +86,19 @@ export default function LibraryPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-surface">
-      <Header />
+      <Header
+        right={
+          <button
+            type="button"
+            onClick={sync.open}
+            aria-label="Dropbox sync"
+            className="focus-ring flex items-center gap-1.5 rounded-full border border-primary/15 bg-surface-container-lowest px-3 py-1.5 text-xs font-bold text-primary shadow-sm transition-colors hover:bg-matcha-foam"
+          >
+            <Icon name="cloud_sync" className="text-base" />
+            <span className="hidden sm:inline">Sync</span>
+          </button>
+        }
+      />
 
       <main className="flex-1 pt-16">
         <h1 className="sr-only">EchoFlow scenario library</h1>
@@ -223,6 +238,8 @@ export default function LibraryPage() {
         onClose={() => setIsCustomModalOpen(false)}
         onSubmit={handleCreateLoop}
       />
+
+      <SyncDialog sync={sync} />
     </div>
   )
 }
