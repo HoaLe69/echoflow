@@ -425,7 +425,7 @@ export default function FreeTalkPage() {
                 className="focus-ring mx-auto flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-on-primary shadow-sm transition-all hover:bg-primary-container active:scale-[0.99]"
               >
                 <Icon name="stop_circle" className="text-lg" />
-                Stop & review
+                Stop recording
               </button>
               <p className="text-[11px] text-outline">
                 The recording stops automatically at the target.
@@ -443,56 +443,100 @@ export default function FreeTalkPage() {
                 <audio controls src={session.audioUrl} className="w-full" />
               ) : null}
 
-              <div className="flex flex-col gap-3 rounded-2xl bg-surface-container-low p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold text-matcha-forest">
-                  <Icon
-                    name={
-                      session.isTranscribing ? 'graphic_eq' : 'check_circle'
-                    }
-                    className={`text-base ${
-                      session.isTranscribing ? 'animate-pulse text-primary' : 'text-primary'
-                    }`}
-                  />
-                  {session.isTranscribing
-                    ? `Transcribing… ${session.transcriptionProgress}%`
-                    : 'Audio transcribed'}
+              {!session.transcript ? (
+                <div className="flex flex-col gap-3 rounded-2xl bg-surface-container-low p-4">
+                  <div className="flex items-start gap-2">
+                    <Icon
+                      name="graphic_eq"
+                      className="mt-0.5 text-base text-primary"
+                    />
+                    <div>
+                      <p className="text-xs font-bold text-matcha-forest">
+                        Audio ready
+                      </p>
+                      <p className="mt-1 text-[11px] leading-relaxed text-matcha-sage">
+                        Get the transcript first. Nothing is sent to Gemini
+                        until you ask for the review.
+                      </p>
+                    </div>
+                  </div>
+
+                  {session.isTranscribing ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="h-1.5 overflow-hidden rounded-full bg-surface-container-highest">
+                        <div
+                          className="h-full rounded-full bg-primary transition-all"
+                          style={{
+                            width: `${session.transcriptionProgress}%`,
+                          }}
+                        />
+                      </div>
+                      <p className="text-[11px] font-semibold text-primary">
+                        Transcribing… {session.transcriptionProgress}%
+                      </p>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void session.transcribe()}
+                      disabled={!session.audioBlob}
+                      className="focus-ring w-fit rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary shadow-sm transition-all hover:bg-primary-container active:scale-95 disabled:opacity-50"
+                    >
+                      {session.error
+                        ? 'Try transcript again'
+                        : 'Get transcript'}
+                    </button>
+                  )}
                 </div>
-                <div className="flex items-center gap-2 text-xs font-semibold text-matcha-forest">
-                  <Icon
-                    name={session.isReviewing ? 'hourglass_top' : 'rate_review'}
-                    className={`text-base ${
-                      session.isReviewing ? 'animate-pulse text-primary' : 'text-outline'
-                    }`}
-                  />
-                  {session.isReviewing
-                    ? 'Reviewing with Gemini…'
-                    : 'Review pending'}
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <div className="rounded-2xl border border-primary/10 bg-surface-container-low p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-outline">
+                      Transcript
+                    </p>
+                    <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-matcha-forest">
+                      {session.transcript}
+                    </p>
+                  </div>
+
+                  {session.isReviewing ? (
+                    <div className="flex items-center gap-2 rounded-2xl bg-surface-container-low p-3 text-xs font-semibold text-primary">
+                      <Icon
+                        name="hourglass_top"
+                        className="animate-pulse text-base"
+                      />
+                      Reviewing with Gemini…
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void session.generateReview()}
+                      className="focus-ring w-fit rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary shadow-sm transition-all hover:bg-primary-container active:scale-95"
+                    >
+                      {session.error
+                        ? 'Try review again'
+                        : 'Review with Gemini'}
+                    </button>
+                  )}
                 </div>
-              </div>
+              )}
 
               {session.error ? (
-                <div className="flex flex-col gap-2">
-                  <p role="alert" className="text-xs font-medium text-error">
-                    {session.error}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={session.retryTranscription}
-                      className="focus-ring rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary"
-                    >
-                      Retry transcription
-                    </button>
-                    <button
-                      type="button"
-                      onClick={resetToSetup}
-                      className="focus-ring rounded-full bg-surface-container-low px-4 py-2 text-xs font-semibold text-matcha-sage"
-                    >
-                      Start over
-                    </button>
-                  </div>
-                </div>
+                <p role="alert" className="text-xs font-medium text-error">
+                  {session.error}
+                </p>
               ) : null}
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={resetToSetup}
+                  disabled={session.isTranscribing || session.isReviewing}
+                  className="focus-ring rounded-full bg-surface-container-low px-4 py-2 text-xs font-semibold text-matcha-sage disabled:opacity-40"
+                >
+                  Start over
+                </button>
+              </div>
             </section>
           ) : null}
 
@@ -503,7 +547,7 @@ export default function FreeTalkPage() {
               audioUrl={session.audioUrl}
               error={session.error}
               isReviewing={session.isReviewing}
-              onRetryReview={session.retryReview}
+              onRetryReview={session.generateReview}
               onTryAgain={resetToSetup}
               onNewTopic={startNewTopic}
             />

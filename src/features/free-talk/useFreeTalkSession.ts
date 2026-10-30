@@ -45,17 +45,15 @@ export function useFreeTalkSession() {
   const [review, setReview] = useState<SpeakingReview | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isTranscribing, setIsTranscribing] = useState(false)
   const [isReviewing, setIsReviewing] = useState(false)
-  const [transcriptionAttempt, setTranscriptionAttempt] = useState(0)
 
-  const processingBlobRef = useRef<Blob | null>(null)
   const generationRef = useRef(0)
   const sessionRef = useRef<SpeakingSession | null>(null)
   const stopRecorder = recorder.stop
 
   const reset = useCallback(() => {
     generationRef.current += 1
-    processingBlobRef.current = null
     sessionRef.current = null
     void transcriber.cancel()
     recorder.reset()
@@ -66,19 +64,20 @@ export function useFreeTalkSession() {
     setReview(null)
     setSessionId(null)
     setError(null)
+    setIsTranscribing(false)
     setIsReviewing(false)
   }, [recorder, transcriber])
 
   const start = useCallback(
     async (nextConfig: FreeTalkStartConfig) => {
       generationRef.current += 1
-      processingBlobRef.current = null
       sessionRef.current = null
       setConfig(nextConfig)
       setTranscript('')
       setReview(null)
       setSessionId(null)
       setError(null)
+      setIsTranscribing(false)
       setIsReviewing(false)
       setElapsedMs(0)
       setStage('recording')
@@ -131,49 +130,36 @@ export function useFreeTalkSession() {
     return () => window.clearInterval(timer)
   }, [config, recorder.isRecording, stage, stopRecorder])
 
-  // Transcribe the finished blob, save the session, then ask Gemini.
-  useEffect(() => {
-    if (stage !== 'processing' || !recorder.audioBlob || !config) return
-    if (processingBlobRef.current === recorder.audioBlob) return
+  /**
+   * Explicit user action: transcribe the stopped recording, then persist the
+   * session. The review is a separate explicit action.
+   */
+  const transcribe = useCallback(async () => {
+    if (!config || !recorder.audioBlob || isTranscribing) return
 
-    processingBlobRef.current = recorder.audioBlob
-    const generation = generationRef.current + 1
-    generationRef.current = generation
+    const generation = ++generationRef.current
+    setIsTranscribing(true)
     setError(null)
 
-    const run = async () => {
-      let text = ''
-      try {
-        const file = toAudioFile(recorder.audioBlob as Blob)
-        const result = await transcriber.transcribe(file, {
-          language: 'en',
-        })
-        text = result.segments
-          .map((segment) => segment.text)
-          .join(' ')
-          .trim()
-      } catch (transcriptionError) {
-        if (generation !== generationRef.current) return
-        setError(
-          transcriptionError instanceof Error
-            ? transcriptionError.message
-            : 'Could not transcribe this recording.',
-        )
-        return
+    try {
+      const file = toAudioFile(recorder.audioBlob)
+      const result = await transcriber.transcribe(file, {
+        language: 'en',
+      })
+      const text = result.segments
+        .map((segment) => segment.text)
+        .join(' ')
+        .trim()
+
+      if (!text) {
+        throw new Error('No speech was detected in this recording.')
       }
 
       if (generation !== generationRef.current) return
 
-      if (!text) {
-        setError('No speech was detected in this recording.')
-        return
-      }
-
-      setTranscript(text)
-
       const now = Date.now()
-      const id = sessionRef.current?.id ?? crypto.randomUUID()
-      const audioId = sessionRef.current?.audioId ?? `${id}-audio`
+      const id = crypto.randomUUID()
+      const audioId = `${id}-audio`
       const session: SpeakingSession = {
         id,
         topic: config.topic,
@@ -186,91 +172,53 @@ export function useFreeTalkSession() {
         transcript: text,
         transcriptProvider: providerId,
         review: null,
-        createdAt: sessionRef.current?.createdAt ?? now,
+        createdAt: now,
       }
       const audio: SpeakingAudio = {
         id: audioId,
-        blob: recorder.audioBlob as Blob,
-        mimeType: recorder.audioBlob?.type || 'audio/webm',
-        sizeBytes: recorder.audioBlob?.size ?? 0,
+        blob: recorder.audioBlob,
+        mimeType: recorder.audioBlob.type || 'audio/webm',
+        sizeBytes: recorder.audioBlob.size,
         durationMs: recorder.durationMs,
         createdAt: now,
       }
 
-      try {
-        await saveSpeakingSession(session, audio)
-        sessionRef.current = session
-        setSessionId(id)
-      } catch (saveError) {
-        if (generation !== generationRef.current) return
-        setError(
-          saveError instanceof Error
-            ? saveError.message
-            : 'Could not save this recording.',
-        )
-        return
-      }
-
+      await saveSpeakingSession(session, audio)
       if (generation !== generationRef.current) return
 
-      setIsReviewing(true)
-      try {
-        const result = await reviewSpeaking({
-          transcript: text,
-          topic: config.topic,
-          level: config.level,
-          focus: config.focus,
-          durationMs: recorder.durationMs,
-        })
-        if (generation !== generationRef.current) return
-
-        const reviewed = { ...session, review: result }
-        await updateSpeakingSession(reviewed)
-        sessionRef.current = reviewed
-        setReview(result)
-        setStage('review')
-      } catch (reviewError) {
-        if (generation !== generationRef.current) return
-        setError(
-          reviewError instanceof Error
-            ? reviewError.message
-            : 'Could not generate a review.',
-        )
-        setStage('review')
-      } finally {
-        if (generation === generationRef.current) {
-          setIsReviewing(false)
-        }
+      sessionRef.current = session
+      setSessionId(id)
+      setTranscript(text)
+    } catch (transcriptionError) {
+      if (generation !== generationRef.current) return
+      setError(
+        transcriptionError instanceof Error
+          ? transcriptionError.message
+          : 'Could not transcribe this recording.',
+      )
+    } finally {
+      if (generation === generationRef.current) {
+        setIsTranscribing(false)
       }
     }
-
-    void run()
   }, [
     config,
+    isTranscribing,
     providerId,
-    recorder,
-    stage,
+    recorder.audioBlob,
+    recorder.durationMs,
     transcriber,
-    transcriptionAttempt,
   ])
 
-  const retryTranscription = useCallback(() => {
-    processingBlobRef.current = null
-    sessionRef.current = null
-    setSessionId(null)
-    setTranscript('')
-    setReview(null)
-    setError(null)
-    setStage('processing')
-    setTranscriptionAttempt((attempt) => attempt + 1)
-  }, [])
-
-  const retryReview = useCallback(async () => {
+  /**
+   * Explicit user action: send the saved transcript to Gemini.
+   */
+  const generateReview = useCallback(async () => {
     const current = sessionRef.current
-    if (!current || !config) return
+    if (!current || isReviewing) return
 
-    setError(null)
     setIsReviewing(true)
+    setError(null)
 
     try {
       const result = await reviewSpeaking({
@@ -291,10 +239,11 @@ export function useFreeTalkSession() {
           ? reviewError.message
           : 'Could not generate a review.',
       )
+      setStage('review')
     } finally {
       setIsReviewing(false)
     }
-  }, [config])
+  }, [isReviewing])
 
   // Load a saved review into the working state when deep-linked.
   const loadSession = useCallback(async (id: string) => {
@@ -316,12 +265,6 @@ export function useFreeTalkSession() {
     return true
   }, [])
 
-  const isTranscribing =
-    stage === 'processing' &&
-    !isReviewing &&
-    (transcriber.status === 'preparing' ||
-      transcriber.status === 'transcribing')
-
   return {
     stage,
     config,
@@ -337,7 +280,9 @@ export function useFreeTalkSession() {
     error:
       error ??
       recorder.error ??
-      (stage === 'processing' ? transcriber.error : null),
+      (stage === 'processing' && !transcript
+        ? transcriber.error
+        : null),
     isTranscribing,
     isReviewing,
     transcriptionProgress: transcriber.progress,
@@ -346,8 +291,8 @@ export function useFreeTalkSession() {
     start,
     stop,
     reset,
-    retryTranscription,
-    retryReview,
+    transcribe,
+    generateReview,
     loadSession,
   }
 }
