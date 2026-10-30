@@ -125,6 +125,13 @@ export default function LibraryPage() {
                   Prepare Custom Loop
                 </button>
                 <Link
+                  to="/speak"
+                  className="focus-ring flex items-center justify-center gap-2 rounded-full bg-hojicha px-5 py-2.5 text-sm font-bold text-on-secondary shadow-sm transition-all hover:bg-hojicha/90 active:scale-[0.98]"
+                >
+                  <Icon name="mic" className="text-lg" />
+                  Free Talk
+                </Link>
+                <Link
                   to="/import"
                   className="focus-ring flex items-center justify-center gap-2 rounded-full border border-primary/20 bg-surface-container-lowest px-5 py-2.5 text-sm font-bold text-primary shadow-sm transition-colors hover:bg-matcha-foam"
                 >
