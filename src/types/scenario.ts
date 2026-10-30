@@ -23,7 +23,7 @@ export type Scenario = {
   /** [your role, partner role] */
   roles: [string, string]
   turns: Turn[]
-  kind?: 'curated' | 'imported',
+  kind?: 'imported',
   audioSourceId?: string
 }
 

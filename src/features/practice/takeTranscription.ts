@@ -1,9 +1,9 @@
-export type TakeTranscriptionMode = 'browser' | 'whisper'
+export type TakeTranscriptionMode = 'browser' | 'provider'
 
 /**
- * iOS/Android browsers use Whisper for take transcription because mobile
- * Web Speech recognition is unreliable after audio playback. Desktop keeps
- * the faster SpeechRecognition path.
+ * Mobile browsers transcribe the finished recording with the configured
+ * transcription provider because mobile Web Speech recognition is unreliable
+ * after audio playback. Desktop keeps the faster SpeechRecognition path.
  *
  * Narrow this to `isIOSDevice()` if Android should stay on Web Speech.
  */
@@ -14,10 +14,10 @@ export function getTakeTranscriptionMode(): TakeTranscriptionMode {
     /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 
-  return isMobile ? 'whisper' : 'browser'
+  return isMobile ? 'provider' : 'browser'
 }
 
-/** Whisper accepts a File/Blob; the extension helps the browser decode it. */
+/** Provider transcription accepts a File/Blob; the extension helps decoding. */
 export function toAudioFile(blob: Blob): File {
   const extension = blob.type.includes('mp4')
     ? 'm4a'

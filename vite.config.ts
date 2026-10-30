@@ -10,6 +10,9 @@ const crossOriginIsolation = {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server: { headers: crossOriginIsolation },
+  server: {
+    headers: crossOriginIsolation,
+    proxy: { '/api': 'http://localhost:3000' }
+  },
   preview: { headers: crossOriginIsolation }
 })

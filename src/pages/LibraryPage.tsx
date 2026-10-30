@@ -5,6 +5,8 @@ import Header from '../components/Header'
 import Icon from '../components/Icon'
 import Pill from '../components/Pill'
 import { deleteImportBundle } from '../data/audioRepository'
+import SyncDialog from '../features/dropbox/SyncDialog'
+import { useDropboxSync } from '../features/dropbox/useDropboxSync'
 import CustomLoopModal from '../features/library/CustomLoopModal'
 import type { CustomLoopFormValues } from '../features/library/CustomLoopModal'
 import LevelTabs from '../features/library/LevelTabs'
@@ -19,6 +21,7 @@ export default function LibraryPage() {
   const navigate = useNavigate()
   const { getProgress, toggleFavorite } = useProgress()
   const { scenarios, isLoading, error, reload } = useScenarioCatalog()
+  const sync = useDropboxSync()
 
   const [query, setQuery] = useState('')
   const [level, setLevel] = useState<LevelFilter>('all')
@@ -83,7 +86,19 @@ export default function LibraryPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-surface">
-      <Header />
+      <Header
+        right={
+          <button
+            type="button"
+            onClick={sync.open}
+            aria-label="Dropbox sync"
+            className="focus-ring flex items-center gap-1.5 rounded-full border border-primary/15 bg-surface-container-lowest px-3 py-1.5 text-xs font-bold text-primary shadow-sm transition-colors hover:bg-matcha-foam"
+          >
+            <Icon name="cloud_sync" className="text-base" />
+            <span className="hidden sm:inline">Sync</span>
+          </button>
+        }
+      />
 
       <main className="flex-1 pt-16">
         <h1 className="sr-only">EchoFlow scenario library</h1>
@@ -137,7 +152,7 @@ export default function LibraryPage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold text-matcha-forest">
-                  Calibrated Practice Loops
+                  Practice Loops
                 </h2>
                 <span aria-live="polite">
                   <Pill tone="primary">
@@ -188,6 +203,28 @@ export default function LibraryPage() {
                   />
                 ))}
               </div>
+            ) : scenarios.length === 0 && !isLoading ? (
+              <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-primary/20 bg-surface-container-lowest px-6 py-16 text-center">
+                <span
+                  aria-hidden="true"
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-matcha-foam text-primary"
+                >
+                  <Icon name="audio_file" className="text-2xl" />
+                </span>
+                <h3 className="mt-4 font-headline text-lg font-bold text-matcha-forest">
+                  No practice loops yet
+                </h3>
+                <p className="mt-1 max-w-sm text-sm text-matcha-sage">
+                  Import a conversation to create your first practice loop.
+                </p>
+                <Link
+                  to="/import"
+                  className="focus-ring mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-xs font-bold text-on-primary shadow-sm transition-all hover:bg-primary-container active:scale-95"
+                >
+                  <Icon name="audio_file" className="text-base" />
+                  Import audio
+                </Link>
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-primary/20 bg-surface-container-lowest px-6 py-16 text-center">
                 <span
@@ -223,6 +260,8 @@ export default function LibraryPage() {
         onClose={() => setIsCustomModalOpen(false)}
         onSubmit={handleCreateLoop}
       />
+
+      <SyncDialog sync={sync} />
     </div>
   )
 }

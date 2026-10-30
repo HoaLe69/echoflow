@@ -57,16 +57,17 @@ export function usePracticeAttempt({
   } = useAudioRecorder()
 
   const {
-    transcribe: transcribeWithWhisper,
-    cancel: cancelWhisper,
-    status: whisperStatus,
-    progress: whisperProgress,
+    transcribe: transcribeRecording,
+    cancel: cancelTranscription,
+    status: transcriptionStatus,
+    progress: transcriptionProgress,
   } = useTranscriber()
 
   const requestedMode = getTakeTranscriptionMode()
   // Fall back to browser recognition if the device cannot record audio.
-  const usesWhisper = requestedMode === 'whisper' && recorderSupported
-  const takeSupported = usesWhisper
+  const usesProvider =
+    requestedMode === 'provider' && recorderSupported
+  const takeSupported = usesProvider
     ? recorderSupported
     : recognitionSupported
 
@@ -80,15 +81,16 @@ export function usePracticeAttempt({
   })
 
   const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null)
-  const [whisperTranscript, setWhisperTranscript] = useState('')
-  const [whisperError, setWhisperError] = useState<string | null>(null)
+  const [providerTranscript, setProviderTranscript] = useState('')
+  const [providerError, setProviderError] = useState<string | null>(null)
 
   const isTranscribing =
-    usesWhisper &&
-    (whisperStatus === 'loading-model' || whisperStatus === 'transcribing')
+    usesProvider &&
+    (transcriptionStatus === 'preparing' ||
+      transcriptionStatus === 'transcribing')
 
   const lastScored = useRef<string | null>(null)
-  const whisperGeneration = useRef(0)
+  const transcriptionGeneration = useRef(0)
   const playCueRef = useRef(audio.playCue)
   const stopAudioRef = useRef(audio.stop)
 
@@ -98,18 +100,18 @@ export function usePracticeAttempt({
   }, [audio.playCue, audio.stop])
 
   const resetAttempt = useCallback(() => {
-    whisperGeneration.current += 1
-    void cancelWhisper()
+    transcriptionGeneration.current += 1
+    void cancelTranscription()
 
-    setWhisperTranscript('')
-    setWhisperError(null)
+    setProviderTranscript('')
+    setProviderError(null)
     lastScored.current = null
     setScoreResult(null)
 
     audio.stop()
     resetRecorder()
     resetRecognition()
-  }, [audio, cancelWhisper, resetRecorder, resetRecognition])
+  }, [audio, cancelTranscription, resetRecorder, resetRecognition])
 
   // New turn/role/round: auto-play the cue from native audio or TTS.
   useEffect(() => {
@@ -122,7 +124,7 @@ export function usePracticeAttempt({
 
   // Desktop: score the browser's live transcript.
   useEffect(() => {
-    if (usesWhisper || isListening) return
+    if (usesProvider || isListening) return
 
     const spoken = browserTranscript.trim()
     if (!spoken || spoken === lastScored.current) return
@@ -132,7 +134,7 @@ export function usePracticeAttempt({
     setScoreResult(result)
     recordAttempt(scenarioId, { fluencyScore: result.score })
   }, [
-    usesWhisper,
+    usesProvider,
     isListening,
     browserTranscript,
     target,
@@ -140,23 +142,23 @@ export function usePracticeAttempt({
     recordAttempt,
   ])
 
-  // Mobile: transcribe the finished recording with Whisper.
+  // Mobile: transcribe the finished recording with the selected provider.
   useEffect(() => {
-    if (!usesWhisper || !recordingBlob) return
+    if (!usesProvider || !recordingBlob) return
 
-    const generation = ++whisperGeneration.current
+    const generation = ++transcriptionGeneration.current
     const file = toAudioFile(recordingBlob)
 
-    void transcribeWithWhisper(file)
+    void transcribeRecording(file)
       .then((result) => {
-        if (generation !== whisperGeneration.current) return
+        if (generation !== transcriptionGeneration.current) return
 
         const spoken = result.segments
           .map((segment) => segment.text)
           .join(' ')
           .trim()
 
-        setWhisperTranscript(spoken)
+        setProviderTranscript(spoken)
         if (!spoken) return
 
         const score = scorePronunciation(target, spoken)
@@ -164,17 +166,17 @@ export function usePracticeAttempt({
         recordAttempt(scenarioId, { fluencyScore: score.score })
       })
       .catch((transcriptionError) => {
-        if (generation !== whisperGeneration.current) return
-        setWhisperError(
+        if (generation !== transcriptionGeneration.current) return
+        setProviderError(
           transcriptionError instanceof Error
             ? transcriptionError.message
-            : 'Whisper could not transcribe this take.',
+            : 'The transcription provider could not transcribe this take.',
         )
       })
   }, [
-    usesWhisper,
+    usesProvider,
     recordingBlob,
-    transcribeWithWhisper,
+    transcribeRecording,
     target,
     scenarioId,
     recordAttempt,
@@ -199,10 +201,10 @@ export function usePracticeAttempt({
 
     lastScored.current = null
     setScoreResult(null)
-    setWhisperTranscript('')
-    setWhisperError(null)
+    setProviderTranscript('')
+    setProviderError(null)
 
-    if (usesWhisper) {
+    if (usesProvider) {
       void startRecorder()
       return
     }
@@ -211,15 +213,15 @@ export function usePracticeAttempt({
     if (recorderSupported) void startRecorder()
   }
 
-  const spokenTranscript = usesWhisper
-    ? whisperTranscript
+  const spokenTranscript = usesProvider
+    ? providerTranscript
     : browserTranscript
 
   return {
     scoreResult,
     isListening,
     isSupported: takeSupported,
-    error: usesWhisper ? null : recognitionError,
+    error: usesProvider ? null : recognitionError,
     audioError: audio.clipError,
     toggleRecording,
     resetAttempt,
@@ -230,10 +232,10 @@ export function usePracticeAttempt({
     isRecording: isListening || isRecorderRecording,
     isTranscribing,
     spokenTranscript,
-    transcriptLabel: usesWhisper ? 'Whisper heard' : 'Browser heard',
-    transcriptionStatus: usesWhisper ? whisperStatus : 'idle',
-    transcriptionProgress: usesWhisper ? whisperProgress : 0,
-    transcriptionError: usesWhisper ? whisperError : null,
+    transcriptLabel: usesProvider ? 'Transcribed' : 'Browser heard',
+    transcriptionStatus: usesProvider ? transcriptionStatus : 'idle',
+    transcriptionProgress: usesProvider ? transcriptionProgress : 0,
+    transcriptionError: usesProvider ? providerError : null,
     recordingUrl,
     recordingDurationMs,
     recorderError,

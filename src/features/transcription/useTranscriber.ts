@@ -1,61 +1,114 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createTranscriptionProvider } from './registry'
+import { useTranscriptionSettings } from './settingsStore'
 import type {
+  TranscriptionOptions,
   TranscriptionProvider,
-  TranscriptResult
+  TranscriptionProviderId,
+  TranscriptResult,
 } from './types'
 
 export type TranscriptionStatus =
   | 'idle'
-  | 'loading-model'
+  | 'preparing'
   | 'transcribing'
   | 'done'
   | 'error'
 
-export function useTranscriber() {
+type UseTranscriberOptions = {
+  providerId?: TranscriptionProviderId
+}
+
+export function useTranscriber(options: UseTranscriberOptions = {}) {
+  const settings = useTranscriptionSettings()
+  const providerId = options.providerId ?? settings.providerId
+
   const [status, setStatus] = useState<TranscriptionStatus>('idle')
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const providerRef = useRef<TranscriptionProvider | null>(null)
+  const activeProviderIdRef = useRef<TranscriptionProviderId | null>(null)
+  const generationRef = useRef(0)
 
   const getProvider = useCallback(async (): Promise<TranscriptionProvider> => {
+    if (
+      providerRef.current &&
+      activeProviderIdRef.current !== providerId
+    ) {
+      providerRef.current.dispose()
+      providerRef.current = null
+      activeProviderIdRef.current = null
+    }
+
     if (!providerRef.current) {
-      // Keep the ~1.5 MB whisper.cpp worker bundle out of the initial load.
-      const { createTranscribeJsProvider } = await import(
-        './transcribeJsProvider'
-      )
-      providerRef.current = createTranscribeJsProvider(setProgress)
+      providerRef.current = await createTranscriptionProvider(providerId)
+      activeProviderIdRef.current = providerId
     }
 
     return providerRef.current
-  }, [])
-
+  }, [providerId])
 
   const transcribe = useCallback(
-    async (file: File): Promise<TranscriptResult> => {
+    async (
+      file: File,
+      options: TranscriptionOptions = {},
+    ): Promise<TranscriptResult> => {
+      const generation = ++generationRef.current
+
       setError(null)
       setProgress(0)
-      setStatus('loading-model')
+      setStatus('preparing')
+
       try {
         const provider = await getProvider()
         await provider.prepare()
+
+        if (generation !== generationRef.current) {
+          throw new DOMException('Transcription was cancelled.', 'AbortError')
+        }
+
         setStatus('transcribing')
-        const result = await provider.transcribe(file)
+
+        const result = await provider.transcribe(file, {
+          ...options,
+          onProgress: (pct) => {
+            if (generation !== generationRef.current) return
+            setProgress(pct)
+            options.onProgress?.(pct)
+          },
+        })
+
+        if (generation !== generationRef.current) {
+          throw new DOMException('Transcription was cancelled.', 'AbortError')
+        }
+
         setProgress(100)
         setStatus('done')
         return result
       } catch (transcriptionError) {
+        if (
+          transcriptionError instanceof DOMException &&
+          transcriptionError.name === 'AbortError'
+        ) {
+          setStatus('idle')
+          throw transcriptionError
+        }
+
         const message =
           transcriptionError instanceof Error
             ? transcriptionError.message
             : 'Transcription failed.'
+
         setStatus('error')
         setError(message)
         throw transcriptionError
       }
-    }, [getProvider]
+    },
+    [getProvider],
   )
 
   const cancel = useCallback(async () => {
+    generationRef.current += 1
     try {
       await providerRef.current?.cancel()
     } finally {
@@ -66,17 +119,20 @@ export function useTranscriber() {
 
   useEffect(() => {
     return () => {
+      generationRef.current += 1
       providerRef.current?.dispose()
       providerRef.current = null
+      activeProviderIdRef.current = null
     }
   }, [])
+
   return {
+    providerId,
     status,
     progress,
     error,
     transcribe,
     cancel,
-    isBusy: status === 'loading-model' || status === 'transcribing'
+    isBusy: status === 'preparing' || status === 'transcribing',
   }
 }
-

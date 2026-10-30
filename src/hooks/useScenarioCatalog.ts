@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { scenarios as curated } from '../data/scenarios'
 import { listAllScenarios } from '../data/scenarioRepository'
 import type { Scenario } from '../types/scenario'
 
 export function useScenarioCatalog() {
-  const [scenarios, setScenarios] = useState<Scenario[]>(curated)
+  const [scenarios, setScenarios] = useState<Scenario[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const requestId = useRef(0)
