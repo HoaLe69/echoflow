@@ -152,7 +152,7 @@ export default function LibraryPage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold text-matcha-forest">
-                  Calibrated Practice Loops
+                  Practice Loops
                 </h2>
                 <span aria-live="polite">
                   <Pill tone="primary">
@@ -202,6 +202,28 @@ export default function LibraryPage() {
                     onToggleFavorite={() => toggleFavorite(scenario.id)}
                   />
                 ))}
+              </div>
+            ) : scenarios.length === 0 && !isLoading ? (
+              <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-primary/20 bg-surface-container-lowest px-6 py-16 text-center">
+                <span
+                  aria-hidden="true"
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-matcha-foam text-primary"
+                >
+                  <Icon name="audio_file" className="text-2xl" />
+                </span>
+                <h3 className="mt-4 font-headline text-lg font-bold text-matcha-forest">
+                  No practice loops yet
+                </h3>
+                <p className="mt-1 max-w-sm text-sm text-matcha-sage">
+                  Import a conversation to create your first practice loop.
+                </p>
+                <Link
+                  to="/import"
+                  className="focus-ring mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-xs font-bold text-on-primary shadow-sm transition-all hover:bg-primary-container active:scale-95"
+                >
+                  <Icon name="audio_file" className="text-base" />
+                  Import audio
+                </Link>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-primary/20 bg-surface-container-lowest px-6 py-16 text-center">
