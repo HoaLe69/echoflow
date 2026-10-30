@@ -1,4 +1,6 @@
-import { guardRequest, MAX_BYTES } from '../_lib/guard'
+/// <reference types="node" />
+
+import { guardRequest, MAX_BYTES } from '../_lib/guard.js'
 
 export const config = { runtime: 'edge' }
 
@@ -36,12 +38,25 @@ export default async function handler(request: Request) {
     )
   }
 
-  const form = await request.formData()
-  const file = form.get('file')
+  let form: FormData
+  try {
+    form = await request.formData()
+  } catch {
+    return Response.json(
+      {
+        error: {
+          code: 'bad_request',
+          message: 'Expected multipart form data.',
+        },
+      },
+      { status: 400 },
+    )
+  }
 
+  const file = form.get('file')
   const language = String(form.get('language') ?? 'en')
 
-  if (!(file instanceof Blob)) {
+  if (!(file instanceof File)) {
     return Response.json(
       { error: { code: 'bad_request', message: 'Missing audio file.' } },
       { status: 400 },
@@ -59,7 +74,6 @@ export default async function handler(request: Request) {
   upstreamForm.append('file', file, file.name)
   upstreamForm.append('model', 'whisper-large-v3-turbo')
   upstreamForm.append('response_format', 'verbose_json')
-  upstreamForm.append('prompt', 'Specify context or spelling'); // Optional
   upstreamForm.append('language', language)
 
   const response = await fetch(

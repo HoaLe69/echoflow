@@ -1,4 +1,6 @@
-import { guardRequest, MAX_BYTES } from '../_lib/guard'
+/// <reference types="node" />
+
+import { guardRequest, MAX_BYTES } from '../_lib/guard.js'
 
 export const config = { runtime: 'edge' }
 
@@ -38,11 +40,25 @@ export default async function handler(request: Request) {
     )
   }
 
-  const form = await request.formData()
+  let form: FormData
+  try {
+    form = await request.formData()
+  } catch {
+    return Response.json(
+      {
+        error: {
+          code: 'bad_request',
+          message: 'Expected multipart form data.',
+        },
+      },
+      { status: 400 },
+    )
+  }
+
   const file = form.get('file')
   const language = String(form.get('language') ?? 'en')
 
-  if (!(file instanceof Blob)) {
+  if (!(file instanceof File)) {
     return Response.json(
       { error: { code: 'bad_request', message: 'Missing audio file.' } },
       { status: 400 },

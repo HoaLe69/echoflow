@@ -19,10 +19,13 @@ import type {
 } from '../types'
 
 import { useTranscriber } from "../../transcription/useTranscriber";
-import type { TranscriptionProviderId } from "../../transcription/types";
+import {
+  DEFAULT_TRANSCRIPTION_PROVIDER_ID,
+  type TranscriptionProviderId,
+} from "../../transcription/types";
 
 export function useAudioImportFlow(
-  providerId: TranscriptionProviderId = 'groq',
+  providerId: TranscriptionProviderId = DEFAULT_TRANSCRIPTION_PROVIDER_ID,
 ) {
   const [step, setStep] = useState<ImportStep>('upload')
   const [file, setFile] = useState<File | null>(null)

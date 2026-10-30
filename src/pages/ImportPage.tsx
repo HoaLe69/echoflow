@@ -12,6 +12,7 @@ import type {
   ImportFormValues,
   SpeakerLabel
 } from "../features/audio-import/types";
+import { getTranscriptionSettings } from "../features/transcription/settingsStore";
 import type { TranscriptionProviderId } from "../features/transcription/types";
 
 
@@ -47,7 +48,9 @@ export default function ImportPage() {
   const navigate = useNavigate()
   const support = getImportSupport()
   const [providerId, setProviderId] =
-    useState<TranscriptionProviderId>('groq')
+    useState<TranscriptionProviderId>(
+      () => getTranscriptionSettings().providerId,
+    )
   const flow = useAudioImportFlow(providerId)
   const audioUrl = useObjectUrl(flow.file)
   const audioRef = useRef<HTMLAudioElement>(null)

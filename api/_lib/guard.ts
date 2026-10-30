@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 const MAX_BYTES = 25 * 1024 * 1024
 
 function jsonError(status: number, code: string, message: string) {

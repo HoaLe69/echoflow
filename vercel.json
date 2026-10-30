@@ -1,6 +1,7 @@
 {
   "version" : 2,
-  "installCommand" : "npm run model:download && npm install",
+  "installCommand" : "npm install",
+  "buildCommand" : "npm run build",
   "headers" : [
     {
       "source": "/(.*)",
