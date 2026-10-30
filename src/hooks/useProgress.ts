@@ -47,8 +47,8 @@ function parseProgress(raw: string): ProgressMap {
     const rawReps = value.reps
     const reps =
       typeof rawReps === 'number' &&
-      Number.isFinite(rawReps) &&
-      rawReps >= 0
+        Number.isFinite(rawReps) &&
+        rawReps >= 0
         ? Math.floor(rawReps)
         : 0
 
@@ -145,12 +145,12 @@ export function useProgress(): UseProgressResult {
         const reps = Math.max(
           0,
           existing.reps +
-            (Number.isFinite(repsDelta) ? Math.round(repsDelta) : 0),
+          (Number.isFinite(repsDelta) ? Math.round(repsDelta) : 0),
         )
 
         const fluencyScore =
           delta.fluencyScore !== undefined &&
-          Number.isFinite(delta.fluencyScore)
+            Number.isFinite(delta.fluencyScore)
             ? clampScore(delta.fluencyScore)
             : existing.fluencyScore
 

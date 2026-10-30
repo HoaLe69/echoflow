@@ -5,7 +5,8 @@ import {
   mergeDraftTurn,
   splitDraftTurn,
   updateDraftTurn,
-  validateDraftTurns
+  validateDraftTurns,
+  type DraftTurnPatch,
 } from '../lib/draftTurns'
 
 import { inspectAudioFile } from "../lib/validateAudioFile";
@@ -15,12 +16,14 @@ import type {
   DraftTurn,
   ImportFormValues,
   ImportStep,
-  SpeakerLabel
 } from '../types'
 
 import { useTranscriber } from "../../transcription/useTranscriber";
+import type { TranscriptionProviderId } from "../../transcription/types";
 
-export function useAudioImportFlow() {
+export function useAudioImportFlow(
+  providerId: TranscriptionProviderId = 'groq',
+) {
   const [step, setStep] = useState<ImportStep>('upload')
   const [file, setFile] = useState<File | null>(null)
   const [durationMs, setDurationMs] = useState(0)
@@ -28,7 +31,7 @@ export function useAudioImportFlow() {
   const [fileError, setFileError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-  const transcriber = useTranscriber()
+  const transcriber = useTranscriber({ providerId })
 
   const chooseFile = useCallback(async (nextFile: File) => {
     setFileError(null)
@@ -61,22 +64,22 @@ export function useAudioImportFlow() {
       // useTranscriber exposes the error for the UI.
     }
   }, [file, transcriber])
-  const updateTurn = useCallback((id: string, patch: { text?: string; speaker?: SpeakerLabel }) => {
+  const updateTurn = useCallback((id: string, patch: DraftTurnPatch) => {
     setTurns((current) => updateDraftTurn(current, id, patch))
   }, [])
   const mergeTurn = useCallback((index: number) => {
     setTurns((current) => mergeDraftTurn(current, index))
   }, [])
 
-  const splitTurn = useCallback((index: number) => {
-    setTurns((current) => splitDraftTurn(current, index))
+  const splitTurn = useCallback((index: number, charIndex: number) => {
+    setTurns((current) => splitDraftTurn(current, index, charIndex))
   }, [])
 
   const save = useCallback(
     async (form: ImportFormValues): Promise<string | null> => {
       if (!file) return null
 
-      const validationError = validateDraftTurns(turns)
+      const validationError = validateDraftTurns(turns, durationMs)
       if (validationError) {
         setSaveError(validationError)
         return null

@@ -150,13 +150,13 @@ export default function MyTakeCard({
           className="mt-3 rounded-xl border border-primary/5 bg-surface-container-lowest p-3"
         >
           <div className="text-[10px] font-bold uppercase tracking-wide text-outline">
-            {transcriptionStatus === 'loading-model'
-              ? 'Preparing Whisper'
+            {transcriptionStatus === 'preparing'
+              ? 'Preparing transcription'
               : 'Transcribing'}
           </div>
           <p className="mt-1 text-xs font-semibold text-primary">
-            {transcriptionStatus === 'loading-model'
-              ? 'Loading the on-device model…'
+            {transcriptionStatus === 'preparing'
+              ? 'Preparing the transcription provider…'
               : 'Listening to your take…'}
           </p>
           {transcriptionStatus === 'transcribing' ? (
@@ -168,7 +168,7 @@ export default function MyTakeCard({
             </div>
           ) : (
             <p className="mt-1 text-[10px] leading-relaxed text-outline">
-              First use downloads about 60 MB. It stays in your browser.
+              This can take a moment on first use.
             </p>
           )}
         </div>

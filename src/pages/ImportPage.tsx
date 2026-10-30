@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from 'react-router-dom'
 import Header from "../components/Header";
 import Icon from "../components/Icon";
+import ProviderMenu from "../features/audio-import/components/ProviderMenu";
+import TimeRangeEditor from "../features/audio-import/components/TimeRangeEditor";
 import { useAudioImportFlow } from "../features/audio-import/hooks/useAudioImportFlow";
 import { AUDIO_ACCEPT, formatDuration } from "../features/audio-import/lib/validateAudioFile";
 import { getImportSupport } from "../features/audio-import/lib/support";
@@ -10,6 +12,7 @@ import type {
   ImportFormValues,
   SpeakerLabel
 } from "../features/audio-import/types";
+import type { TranscriptionProviderId } from "../features/transcription/types";
 
 
 function useObjectUrl(file: File | null): string | null {
@@ -36,14 +39,23 @@ const initialForm: ImportFormValues = {
   roleB: 'Speaker B',
 }
 
+function formatPlayhead(ms: number): string {
+  return `${(ms / 1000).toFixed(1)}s`
+}
+
 export default function ImportPage() {
   const navigate = useNavigate()
   const support = getImportSupport()
-  const flow = useAudioImportFlow()
+  const [providerId, setProviderId] =
+    useState<TranscriptionProviderId>('groq')
+  const flow = useAudioImportFlow(providerId)
   const audioUrl = useObjectUrl(flow.file)
   const audioRef = useRef<HTMLAudioElement>(null)
   const stopAtRef = useRef<number | null>(null)
+  const caretByTurnRef = useRef<Record<string, number>>({})
   const [form, setForm] = useState<ImportFormValues>(initialForm)
+  const [playheadMs, setPlayheadMs] = useState(0)
+  const [splitHint, setSplitHint] = useState<string | null>(null)
 
   const updateForm = <K extends keyof ImportFormValues>(
     key: K,
@@ -55,10 +67,50 @@ export default function ImportPage() {
   const playTurn = (turn: DraftTurn) => {
     const audio = audioRef.current
     if (!audio) return
+    setSplitHint(null)
+    setPlayheadMs(turn.startMs)
     stopAtRef.current = turn.endMs / 1000
     audio.currentTime = turn.startMs / 1000
     void audio.play()
   }
+
+  const rememberCaret = (
+    turnId: string,
+    element: HTMLTextAreaElement,
+  ) => {
+    caretByTurnRef.current[turnId] = element.selectionStart
+    if (splitHint) setSplitHint(null)
+  }
+
+  const splitTurnAtCursor = (index: number) => {
+    const turn = flow.turns[index]
+    if (!turn) return
+
+    const cursor = caretByTurnRef.current[turn.id]
+    if (cursor === undefined) {
+      setSplitHint(
+        'Click inside the transcript first to choose where to split.',
+      )
+      return
+    }
+
+    if (cursor <= 0 || cursor >= turn.text.length) {
+      setSplitHint('Place the cursor between two parts of the text.')
+      return
+    }
+
+    const before = turn.text.slice(0, cursor).trim()
+    const after = turn.text.slice(cursor).trim()
+    if (!before || !after) {
+      setSplitHint('Place the cursor between two parts of the text.')
+      return
+    }
+
+    setSplitHint(null)
+    delete caretByTurnRef.current[turn.id]
+    flow.splitTurn(index, cursor)
+  }
+
   const handleSave = async () => {
     const scenarioId = await flow.save(form)
     if (scenarioId) navigate(`/practice/${scenarioId}`)
@@ -124,7 +176,8 @@ export default function ImportPage() {
             ) : null}
 
             <p className="mt-3 text-[11px] leading-relaxed text-outline">
-              Your audio stays in this browser. It is not uploaded to a server.
+              Your audio stays in this browser until you choose a remote
+              transcription method.
             </p>
           </section>
         ) : null}
@@ -140,19 +193,25 @@ export default function ImportPage() {
               </p>
             </div>
 
+            <ProviderMenu
+              value={providerId}
+              onChange={setProviderId}
+              disabled={flow.transcriber.isBusy}
+            />
+
             <p className="text-xs leading-relaxed text-matcha-sage">
-              The first run downloads a ~60 MB Whisper model. It stays cached
-              in your browser. Audio is not uploaded to a server.
+              Depending on the selected provider, transcription runs on-device
+              or through this app&apos;s server.
             </p>
 
             <p className="text-[11px] leading-relaxed text-outline">
-              If the model fails to load, run <code>npm run model:download</code>{' '}
-              and reload this page.
+              On-device mode loads a ~60 MB model on first use. If it fails,
+              run <code>npm run model:download</code> and reload this page.
             </p>
 
-            {flow.transcriber.status === 'loading-model' ? (
+            {flow.transcriber.status === 'preparing' ? (
               <p className="text-xs font-semibold text-primary">
-                Loading the Whisper model…
+                Preparing transcription…
               </p>
             ) : null}
 
@@ -218,8 +277,10 @@ export default function ImportPage() {
                   className="w-full"
                   onTimeUpdate={() => {
                     const audio = audioRef.current
+                    if (!audio) return
+
+                    setPlayheadMs(Math.round(audio.currentTime * 1000))
                     if (
-                      audio &&
                       stopAtRef.current !== null &&
                       audio.currentTime >= stopAtRef.current
                     ) {
@@ -229,15 +290,34 @@ export default function ImportPage() {
                   }}
                 />
               ) : null}
+
+              <div className="flex flex-wrap items-center justify-between gap-2 px-3 pb-3 pt-1 text-[11px]">
+                <span className="font-mono text-outline">
+                  Playhead: {formatPlayhead(playheadMs)}
+                </span>
+                <span className="text-outline">
+                  Times are editable in each turn below
+                </span>
+              </div>
             </div>
             <div className="rounded-3xl border border-primary/10 bg-surface-container-lowest p-6 shadow-card">
               <h2 className="font-headline text-lg font-bold text-matcha-forest">
                 Review transcript
               </h2>
               <p className="mt-1 text-xs text-matcha-sage">
-                Whisper does not know who is speaking. Correct the speaker labels
-                and text before saving.
+                Correct speaker labels and text. Place the cursor in a turn to
+                choose where to split; times are estimated and can be edited in
+                seconds.
               </p>
+
+              {splitHint ? (
+                <p
+                  role="status"
+                  className="mt-2 rounded-xl bg-error-container px-3 py-2 text-[11px] font-medium text-on-error-container"
+                >
+                  {splitHint}
+                </p>
+              ) : null}
 
               <div className="mt-4 flex max-h-[45vh] flex-col gap-3 overflow-y-auto pr-1">
                 {flow.turns.map((turn, index) => (
@@ -260,24 +340,41 @@ export default function ImportPage() {
                         <option value="B">Speaker B</option>
                       </select>
 
-                      <span className="font-mono text-[11px] text-outline">
-                        {formatDuration(turn.startMs)} –{' '}
-                        {formatDuration(turn.endMs)}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <TimeRangeEditor
+                          startMs={turn.startMs}
+                          endMs={turn.endMs}
+                          durationMs={flow.durationMs}
+                          onChange={(range) => {
+                            setSplitHint(null)
+                            flow.updateTurn(turn.id, range)
+                          }}
+                        />
 
-                      <button
-                        type="button"
-                        onClick={() => playTurn(turn)}
-                        className="focus-ring rounded-full px-2 py-1 text-xs font-semibold text-primary hover:bg-surface-container-high"
-                      >
-                        Play
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => playTurn(turn)}
+                          className="focus-ring rounded-full px-2 py-1 text-xs font-semibold text-primary hover:bg-surface-container-high"
+                        >
+                          Play
+                        </button>
+                      </div>
                     </div>
 
                     <textarea
                       value={turn.text}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        rememberCaret(turn.id, event.currentTarget)
                         flow.updateTurn(turn.id, { text: event.target.value })
+                      }}
+                      onSelect={(event) =>
+                        rememberCaret(turn.id, event.currentTarget)
+                      }
+                      onClick={(event) =>
+                        rememberCaret(turn.id, event.currentTarget)
+                      }
+                      onKeyUp={(event) =>
+                        rememberCaret(turn.id, event.currentTarget)
                       }
                       rows={2}
                       className="mt-2 w-full resize-none rounded-xl border border-primary/10 bg-white px-3 py-2 text-xs text-matcha-forest focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -286,7 +383,10 @@ export default function ImportPage() {
                     <div className="mt-2 flex items-center gap-3 text-[11px]">
                       <button
                         type="button"
-                        onClick={() => flow.mergeTurn(index)}
+                        onClick={() => {
+                          setSplitHint(null)
+                          flow.mergeTurn(index)
+                        }}
                         disabled={index === 0}
                         className="font-semibold text-matcha-sage hover:text-primary disabled:opacity-40"
                       >
@@ -294,10 +394,10 @@ export default function ImportPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => flow.splitTurn(index)}
+                        onClick={() => splitTurnAtCursor(index)}
                         className="font-semibold text-matcha-sage hover:text-primary"
                       >
-                        Split
+                        Split at cursor
                       </button>
                     </div>
                   </div>
