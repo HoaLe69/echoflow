@@ -1,6 +1,7 @@
 /// <reference types="node" />
 
 import { guardRequest, MAX_BYTES } from '../_lib/guard.js'
+import { getAudioFile } from '../_lib/audioForm.js'
 
 export const config = { runtime: 'edge' }
 
@@ -55,10 +56,10 @@ export default async function handler(request: Request) {
     )
   }
 
-  const file = form.get('file')
+  const file = getAudioFile(form)
   const language = String(form.get('language') ?? 'en')
 
-  if (!(file instanceof File)) {
+  if (!file) {
     return Response.json(
       { error: { code: 'bad_request', message: 'Missing audio file.' } },
       { status: 400 },

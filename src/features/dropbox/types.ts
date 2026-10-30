@@ -3,15 +3,22 @@ import type {
   AudioSourceRecord,
   ImportedScenarioRecord,
 } from '../audio-import/types'
+import type {
+  SpeakingAudio,
+  SpeakingSession,
+} from '../free-talk/types'
 
 export type SnapshotAudioSource = Omit<AudioSourceRecord, 'blob'>
+export type SnapshotSpeakingAudio = Omit<SpeakingAudio, 'blob'>
 
 export type DropboxSnapshot = {
-  schemaVersion: 1
+  schemaVersion: 2
   exportedAt: number
   progress: ProgressMap
   scenarios: ImportedScenarioRecord[]
   audioSources: SnapshotAudioSource[]
+  speakingSessions: SpeakingSession[]
+  speakingAudioSources: SnapshotSpeakingAudio[]
 }
 
 export type DropboxAccount = {

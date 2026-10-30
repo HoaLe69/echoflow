@@ -4,6 +4,10 @@ import type {
   AudioSourceRecord,
   ImportedScenarioRecord
 } from '../features/audio-import/types'
+import type {
+  SpeakingAudio,
+  SpeakingSession,
+} from '../features/free-talk/types'
 
 
 interface EchoFlowDb extends DBSchema {
@@ -16,6 +20,15 @@ interface EchoFlowDb extends DBSchema {
     value: ImportedScenarioRecord,
     indexes: { 'by-createdAt': number }
   }
+  speakingSessions: {
+    key: string,
+    value: SpeakingSession,
+    indexes: { 'by-createdAt': number }
+  }
+  speakingAudio: {
+    key: string,
+    value: SpeakingAudio
+  }
 }
 
 let dbPromise: Promise<IDBPDatabase<EchoFlowDb>> | null = null
@@ -26,7 +39,7 @@ export function getAudioDb() {
   }
 
   if (!dbPromise) {
-    dbPromise = openDB<EchoFlowDb>('echoflow', 1, {
+    dbPromise = openDB<EchoFlowDb>('echoflow', 2, {
       upgrade(db) {
         if (!db.objectStoreNames.contains('audioSources')) {
           db.createObjectStore('audioSources', { keyPath: 'id' })
@@ -35,6 +48,17 @@ export function getAudioDb() {
         if (!db.objectStoreNames.contains('importedScenarios')) {
           const store = db.createObjectStore('importedScenarios', { keyPath: 'id' })
           store.createIndex('by-createdAt', 'createdAt')
+        }
+
+        if (!db.objectStoreNames.contains('speakingSessions')) {
+          const store = db.createObjectStore('speakingSessions', {
+            keyPath: 'id',
+          })
+          store.createIndex('by-createdAt', 'createdAt')
+        }
+
+        if (!db.objectStoreNames.contains('speakingAudio')) {
+          db.createObjectStore('speakingAudio', { keyPath: 'id' })
         }
       }
     })

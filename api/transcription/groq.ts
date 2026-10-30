@@ -1,6 +1,10 @@
 /// <reference types="node" />
 
 import { guardRequest, MAX_BYTES } from '../_lib/guard.js'
+import {
+  getAudioFile,
+  getAudioFileName,
+} from '../_lib/audioForm.js'
 
 export const config = { runtime: 'edge' }
 
@@ -53,10 +57,10 @@ export default async function handler(request: Request) {
     )
   }
 
-  const file = form.get('file')
+  const file = getAudioFile(form)
   const language = String(form.get('language') ?? 'en')
 
-  if (!(file instanceof File)) {
+  if (!file) {
     return Response.json(
       { error: { code: 'bad_request', message: 'Missing audio file.' } },
       { status: 400 },
@@ -71,7 +75,7 @@ export default async function handler(request: Request) {
   }
 
   const upstreamForm = new FormData()
-  upstreamForm.append('file', file, file.name)
+  upstreamForm.append('file', file, getAudioFileName(file))
   upstreamForm.append('model', 'whisper-large-v3-turbo')
   upstreamForm.append('response_format', 'verbose_json')
   upstreamForm.append('language', language)
