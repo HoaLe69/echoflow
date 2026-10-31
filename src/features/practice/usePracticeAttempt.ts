@@ -61,7 +61,7 @@ export function usePracticeAttempt({
     cancel: cancelTranscription,
     status: transcriptionStatus,
     progress: transcriptionProgress,
-  } = useTranscriber()
+  } = useTranscriber({ providerId: 'groq' })
 
   const requestedMode = getTakeTranscriptionMode()
   // Fall back to browser recognition if the device cannot record audio.
