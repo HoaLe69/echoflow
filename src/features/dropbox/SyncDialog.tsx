@@ -85,8 +85,9 @@ export default function SyncDialog({ sync }: SyncDialogProps) {
           id="dropbox-sync-description"
           className="mt-2 text-xs leading-relaxed text-matcha-sage"
         >
-          Back up your imported conversations, free talks, audio, and progress
-          to Dropbox. Restore them on another browser.
+          Back up your imported conversations, free talks, audio, progress, YouTube
+          videos, and vocabulary notes to Dropbox. Restore them on another
+          browser.
         </p>
 
         {!sync.isConfigured ? (
@@ -159,7 +160,7 @@ export default function SyncDialog({ sync }: SyncDialogProps) {
                 type="button"
                 onClick={() => {
                   const confirmed = window.confirm(
-                    'Restore will replace all imported conversations, free talks, audio, and progress on this browser. Continue?',
+                    'Restore will replace imported conversations, free talks, audio, progress, YouTube videos, and vocabulary notes on this browser. Continue?',
                   )
                   if (confirmed) void sync.restore()
                 }}
