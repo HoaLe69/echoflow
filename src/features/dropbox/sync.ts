@@ -14,6 +14,12 @@ import type {
   SpeakingAudio,
   SpeakingSession,
 } from '../free-talk/types'
+import {
+  getAllNoteRecords,
+  getAllVideoRecords,
+  replaceYouTubeData,
+} from '../youtube/db'
+import { isNoteRecord, isVideoRecord } from '../youtube/lib/validate'
 import { downloadDropboxFile, uploadDropboxFile } from './client'
 import type {
   DropboxLastSync,
@@ -33,6 +39,7 @@ type ProgressListener = (progress: SyncProgress) => void
 type ParsedSnapshot = {
   snapshot: DropboxSnapshot
   includesSpeakingData: boolean
+  includesYouTubeData: boolean
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -66,9 +73,15 @@ function isSpeakingAudioMetadata(
   )
 }
 
-function parseSnapshot(value: unknown): ParsedSnapshot | null {
+export function parseDropboxSnapshot(value: unknown): ParsedSnapshot | null {
   if (!isRecord(value)) return null
-  if (value.schemaVersion !== 1 && value.schemaVersion !== 2) return null
+  if (
+    value.schemaVersion !== 1 &&
+    value.schemaVersion !== 2 &&
+    value.schemaVersion !== 3
+  ) {
+    return null
+  }
 
   if (
     typeof value.exportedAt !== 'number' ||
@@ -80,7 +93,9 @@ function parseSnapshot(value: unknown): ParsedSnapshot | null {
     return null
   }
 
-  const includesSpeakingData = value.schemaVersion === 2
+  const includesSpeakingData = value.schemaVersion >= 2
+  const includesYouTubeData = value.schemaVersion === 3
+
   if (
     includesSpeakingData &&
     (!Array.isArray(value.speakingSessions) ||
@@ -90,10 +105,21 @@ function parseSnapshot(value: unknown): ParsedSnapshot | null {
     return null
   }
 
+  if (
+    includesYouTubeData &&
+    (!Array.isArray(value.videos) ||
+      !value.videos.every(isVideoRecord) ||
+      !Array.isArray(value.notes) ||
+      !value.notes.every(isNoteRecord))
+  ) {
+    return null
+  }
+
   return {
     includesSpeakingData,
+    includesYouTubeData,
     snapshot: {
-      schemaVersion: 2,
+      schemaVersion: 3,
       exportedAt: value.exportedAt,
       progress: value.progress as DropboxSnapshot['progress'],
       scenarios: value.scenarios as DropboxSnapshot['scenarios'],
@@ -103,6 +129,12 @@ function parseSnapshot(value: unknown): ParsedSnapshot | null {
         : [],
       speakingAudioSources: includesSpeakingData
         ? (value.speakingAudioSources as SnapshotSpeakingAudio[])
+        : [],
+      videos: includesYouTubeData
+        ? (value.videos as DropboxSnapshot['videos'])
+        : [],
+      notes: includesYouTubeData
+        ? (value.notes as DropboxSnapshot['notes'])
         : [],
     },
   }
@@ -153,17 +185,25 @@ async function createLocalSnapshot(): Promise<{
   sources: AudioSourceRecord[]
   speakingAudio: SpeakingAudio[]
 }> {
-  const [sources, scenarios, speakingSessions, speakingAudio] =
-    await Promise.all([
-      listAllAudioSources(),
-      listImportedScenarios(),
-      listSpeakingSessions(),
-      listAllSpeakingAudio(),
-    ])
+  const [
+    sources,
+    scenarios,
+    speakingSessions,
+    speakingAudio,
+    videos,
+    notes,
+  ] = await Promise.all([
+    listAllAudioSources(),
+    listImportedScenarios(),
+    listSpeakingSessions(),
+    listAllSpeakingAudio(),
+    getAllVideoRecords(),
+    getAllNoteRecords(),
+  ])
 
   return {
     snapshot: {
-      schemaVersion: 2,
+      schemaVersion: 3,
       exportedAt: Date.now(),
       progress: readProgress(),
       scenarios,
@@ -172,6 +212,8 @@ async function createLocalSnapshot(): Promise<{
       speakingAudioSources: speakingAudio.map(
         ({ blob: _blob, ...metadata }) => metadata,
       ),
+      videos,
+      notes,
     },
     sources,
     speakingAudio,
@@ -206,7 +248,7 @@ export async function backupToDropbox(
   }
 
   onProgress?.({
-    message: 'Uploading transcript and review data',
+    message: 'Uploading library data',
     current: sources.length + speakingAudio.length,
     total,
   })
@@ -247,12 +289,12 @@ export async function restoreFromDropbox(
     throw new Error('The Dropbox backup data is not valid JSON.')
   }
 
-  const result = parseSnapshot(parsed)
+  const result = parseDropboxSnapshot(parsed)
   if (!result) {
     throw new Error('The Dropbox backup uses an unsupported format.')
   }
 
-  const { snapshot, includesSpeakingData } = result
+  const { snapshot, includesSpeakingData, includesYouTubeData } = result
   const total =
     snapshot.audioSources.length +
     snapshot.speakingAudioSources.length +
@@ -323,6 +365,9 @@ export async function restoreFromDropbox(
   await replaceImportData(sources, snapshot.scenarios)
   if (includesSpeakingData) {
     await replaceSpeakingData(snapshot.speakingSessions, speakingAudio)
+  }
+  if (includesYouTubeData) {
+    await replaceYouTubeData(snapshot.videos, snapshot.notes)
   }
   writeProgress(snapshot.progress)
 

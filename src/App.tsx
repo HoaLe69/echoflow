@@ -8,6 +8,9 @@ const FreeTalkPage = lazy(() => import('./pages/FreeTalkPage'))
 const FreeTalkReviewPage = lazy(
   () => import('./pages/FreeTalkReviewPage'),
 )
+const VideosPage = lazy(() => import('./features/youtube/VideosPage'))
+const WatchPage = lazy(() => import('./features/youtube/WatchPage'))
+const VocabularyPage = lazy(() => import('./features/youtube/VocabularyPage'))
 
 const pageLoading = (label: string) => (
   <div className="flex min-h-dvh items-center justify-center bg-surface text-sm font-semibold text-matcha-sage">
@@ -42,6 +45,30 @@ export default function App() {
           element={
             <Suspense fallback={pageLoading('Loading audio import…')}>
               <ImportPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/videos"
+          element={
+            <Suspense fallback={pageLoading('Loading videos…')}>
+              <VideosPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/videos/:id"
+          element={
+            <Suspense fallback={pageLoading('Loading video…')}>
+              <WatchPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/vocabulary"
+          element={
+            <Suspense fallback={pageLoading('Loading vocabulary…')}>
+              <VocabularyPage />
             </Suspense>
           }
         />

@@ -1,10 +1,21 @@
-const shortcuts = [
+const practiceShortcuts = [
   { key: 'Space', label: 'to speak' },
   { key: 'H', label: 'hide script' },
   { key: 'R', label: 'replay' },
 ] as const
 
-export default function Footer() {
+export type FooterShortcut = {
+  key: string
+  label: string
+}
+
+type FooterProps = {
+  shortcuts?: readonly FooterShortcut[]
+}
+
+export default function Footer({
+  shortcuts = practiceShortcuts,
+}: FooterProps) {
   return (
     <footer className="mt-auto w-full border-t border-primary/10 bg-surface-container-low py-5">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:px-6 md:flex-row">

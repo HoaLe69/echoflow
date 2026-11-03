@@ -5,6 +5,8 @@ type SearchBarProps = {
   value: string
   onChange: (value: string) => void
   placeholder?: string
+  /** Accessible name for the search field. */
+  label?: string
   className?: string
 }
 
@@ -12,6 +14,7 @@ export default function SearchBar({
   value,
   onChange,
   placeholder = 'Search coffee, airport, standup, small talk...',
+  label = 'Search scenarios',
   className = '',
 }: SearchBarProps) {
   const inputId = useId()
@@ -19,7 +22,7 @@ export default function SearchBar({
   return (
     <div className={`relative ${className}`}>
       <label htmlFor={inputId} className="sr-only">
-        Search scenarios
+        {label}
       </label>
       <Icon
         name="search"

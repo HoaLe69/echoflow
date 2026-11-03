@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import Icon from '../components/Icon'
@@ -88,15 +88,25 @@ export default function LibraryPage() {
     <div className="flex min-h-dvh flex-col bg-surface">
       <Header
         right={
-          <button
-            type="button"
-            onClick={sync.open}
-            aria-label="Dropbox sync"
-            className="focus-ring flex items-center gap-1.5 rounded-full border border-primary/15 bg-surface-container-lowest px-3 py-1.5 text-xs font-bold text-primary shadow-sm transition-colors hover:bg-matcha-foam"
-          >
-            <Icon name="cloud_sync" className="text-base" />
-            <span className="hidden sm:inline">Sync</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <a
+              href="/videos"
+              aria-label="Open YouTube vocabulary notebook"
+              className="focus-ring flex items-center gap-1.5 rounded-full border border-primary/15 bg-surface-container-lowest px-3 py-1.5 text-xs font-bold text-primary shadow-sm transition-colors hover:bg-matcha-foam"
+            >
+              <Icon name="video_library" className="text-base" />
+              <span className="hidden sm:inline">Videos</span>
+            </a>
+            <button
+              type="button"
+              onClick={sync.open}
+              aria-label="Dropbox sync"
+              className="focus-ring flex items-center gap-1.5 rounded-full border border-primary/15 bg-surface-container-lowest px-3 py-1.5 text-xs font-bold text-primary shadow-sm transition-colors hover:bg-matcha-foam"
+            >
+              <Icon name="cloud_sync" className="text-base" />
+              <span className="hidden sm:inline">Sync</span>
+            </button>
+          </div>
         }
       />
 
@@ -124,20 +134,20 @@ export default function LibraryPage() {
                   <Icon name="add_circle" className="text-lg" />
                   Prepare Custom Loop
                 </button>
-                <Link
-                  to="/speak"
+                <a
+                  href="/speak"
                   className="focus-ring flex items-center justify-center gap-2 rounded-full bg-hojicha px-5 py-2.5 text-sm font-bold text-on-secondary shadow-sm transition-all hover:bg-hojicha/90 active:scale-[0.98]"
                 >
                   <Icon name="mic" className="text-lg" />
                   Free Talk
-                </Link>
-                <Link
-                  to="/import"
+                </a>
+                <a
+                  href="/import"
                   className="focus-ring flex items-center justify-center gap-2 rounded-full border border-primary/20 bg-surface-container-lowest px-5 py-2.5 text-sm font-bold text-primary shadow-sm transition-colors hover:bg-matcha-foam"
                 >
                   <Icon name="audio_file" className="text-lg" />
                   Import audio
-                </Link>
+                </a>
                 <SearchBar
                   value={query}
                   onChange={setQuery}
@@ -224,13 +234,13 @@ export default function LibraryPage() {
                 <p className="mt-1 max-w-sm text-sm text-matcha-sage">
                   Import a conversation to create your first practice loop.
                 </p>
-                <Link
-                  to="/import"
+                <a
+                  href="/import"
                   className="focus-ring mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-xs font-bold text-on-primary shadow-sm transition-all hover:bg-primary-container active:scale-95"
                 >
                   <Icon name="audio_file" className="text-base" />
                   Import audio
-                </Link>
+                </a>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-primary/20 bg-surface-container-lowest px-6 py-16 text-center">
